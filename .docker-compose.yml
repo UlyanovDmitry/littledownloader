@@ -1,0 +1,20 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: littledownloader_development
+      POSTGRES_USER: littledownloader
+      POSTGRES_PASSWORD: littledownloader
+    ports: ["5435:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U littledownloader -d littledownloader_development"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+
+volumes:
+  pgdata:
