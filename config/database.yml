@@ -23,7 +23,7 @@ default: &default
 development:
   <<: *default
   host: localhost
-  port: 5435
+  port: 5432
   database: littledownloader_development
   username: littledownloader
   password: littledownloader
@@ -61,7 +61,7 @@ development:
 test:
   <<: *default
   host: localhost
-  port: 5435
+  port: 5432
   database: littledownloader_test
   username: littledownloader
   password: littledownloader
