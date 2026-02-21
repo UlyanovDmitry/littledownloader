@@ -1,0 +1,12 @@
+ru:
+  telegram:
+    handlers:
+      text_handler:
+        message: "Пришли ссылку на видео"
+      errors:
+        not_allowed: "⛔️ Доступ закрыт.\nТвой Telegram ID: %{telegram_id}"
+        unknown_command: "Неизвестная команда"
+      start_command:
+        message: "Привет! Пришли ссылку, я попробую её обработать."
+      whoami_command:
+        message: "Твой Telegram user_id: %{telegram_id}\nUsername: @%{username}"
