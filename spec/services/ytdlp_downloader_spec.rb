@@ -9,16 +9,21 @@ RSpec.describe YtdlpDownloader do
 
   before do
     allow(FileUtils).to receive(:mkdir_p)
+    allow(FileUtils).to receive(:mv)
+    allow(FileUtils).to receive(:rm_rf)
     allow(subject).to receive(:ensure_bin!).and_return(true)
+    allow(SecureRandom).to receive(:hex).and_return('12345678')
   end
 
   describe '#download' do
-    it 'calls yt-dlp with correct arguments for video' do
+    let(:tmp_dir) { File.join(Dir.tmpdir, 'ytdlp_12345678') }
+
+    it 'calls yt-dlp with correct arguments for video and moves file' do
       expected_cmd = [
         'yt-dlp', '--no-color', '--newline',
         '--print', 'after_move:filepath',
         '--extractor-args', 'youtube:player_client=web',
-        '-o', "#{download_dir}/%(title)s.%(ext)s",
+        '-o', "#{tmp_dir}/%(title)s.%(ext)s",
         '--ignore-errors', '--no-mtime',
         '-f', YtdlpDownloader::DEFAULT_FORMAT_SELECTOR,
         '--merge-output-format', YtdlpDownloader::DEFAULT_MERGE_FORMAT,
@@ -26,11 +31,17 @@ RSpec.describe YtdlpDownloader do
         url
       ]
 
-      expect(subject).to receive(:run!).with(expected_cmd).and_return(true)
-      subject.download
+      result_path = "#{tmp_dir}/video.mp4"
+      final_path = "#{download_dir}/video.mp4"
+
+      expect(subject).to receive(:run!).with(expected_cmd).and_return(result_path)
+      expect(File).to receive(:exist?).with(result_path).and_return(true)
+      expect(FileUtils).to receive(:mv).with(result_path, final_path)
+
+      expect(subject.download).to eq(final_path)
     end
 
-    it 'calls yt-dlp with correct arguments for audio-only' do
+    it 'calls yt-dlp with correct arguments for audio-only and moves file' do
       downloader = described_class.new(url, download_dir: download_dir, audio_only: true)
       allow(downloader).to receive(:ensure_bin!).and_return(true)
 
@@ -38,15 +49,21 @@ RSpec.describe YtdlpDownloader do
         'yt-dlp', '--no-color', '--newline',
         '--print', 'after_move:filepath',
         '--extractor-args', 'youtube:player_client=web',
-        '-o', "#{download_dir}/%(title)s.%(ext)s",
+        '-o', "#{tmp_dir}/%(title)s.%(ext)s",
         '--ignore-errors', '--no-mtime',
         '-x', '--audio-format', YtdlpDownloader::DEFAULT_AUDIO_FORMAT,
         '--embed-metadata', '--embed-thumbnail',
         url
       ]
 
-      expect(downloader).to receive(:run!).with(expected_cmd).and_return(true)
-      downloader.download
+      result_path = "#{tmp_dir}/audio.mp3"
+      final_path = "#{download_dir}/audio.mp3"
+
+      expect(downloader).to receive(:run!).with(expected_cmd).and_return(result_path)
+      expect(File).to receive(:exist?).with(result_path).and_return(true)
+      expect(FileUtils).to receive(:mv).with(result_path, final_path)
+
+      expect(downloader.download).to eq(final_path)
     end
 
     it 'raises DownloadError if command fails' do

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'open3'
+require 'securerandom'
+require 'tmpdir'
 
 class YtdlpDownloader
   class DownloadError < StandardError; end
@@ -21,8 +23,24 @@ class YtdlpDownloader
 
     FileUtils.mkdir_p(@download_dir)
 
-    cmd = build_command
-    run!(cmd)
+    # Создаем временную директорию для процесса скачивания
+    tmp_dir = File.join(Dir.tmpdir, "ytdlp_#{SecureRandom.hex(8)}")
+    FileUtils.mkdir_p(tmp_dir)
+
+    begin
+      cmd = build_command(tmp_dir)
+      result_path = run!(cmd)
+
+      if result_path && File.exist?(result_path)
+        final_path = File.join(@download_dir, File.basename(result_path))
+        FileUtils.mv(result_path, final_path)
+        final_path
+      else
+        result_path
+      end
+    ensure
+      FileUtils.rm_rf(tmp_dir)
+    end
   end
 
   private
@@ -33,8 +51,8 @@ class YtdlpDownloader
     raise DownloadError, "Required binary `#{name}` is missing. Install via Homebrew: brew install #{name}"
   end
 
-  def build_command
-    out_template = File.join(@download_dir, '%(title)s.%(ext)s')
+  def build_command(target_dir = @download_dir)
+    out_template = File.join(target_dir, '%(title)s.%(ext)s')
 
     cmd = %w[yt-dlp --no-color --newline]
     cmd += ['--print', 'after_move:filepath']
