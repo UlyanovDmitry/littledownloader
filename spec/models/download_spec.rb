@@ -49,4 +49,17 @@ RSpec.describe Download, type: :model do
       expect(download.audio_only).to be false
     end
   end
+
+  describe 'soft delete scopes' do
+    it 'excludes soft-deleted records from default scope' do
+      active_download = Download.create!(user: user, chat_id: 456, url: 'http://example.com/active')
+      deleted_download = Download.create!(user: user, chat_id: 456, url: 'http://example.com/deleted')
+      deleted_download.update!(deleted_at: Time.current)
+
+      expect(Download.pluck(:id)).to include(active_download.id)
+      expect(Download.pluck(:id)).not_to include(deleted_download.id)
+      expect(Download.with_deleted.pluck(:id)).to include(active_download.id, deleted_download.id)
+      expect(Download.only_deleted.pluck(:id)).to include(deleted_download.id)
+    end
+  end
 end

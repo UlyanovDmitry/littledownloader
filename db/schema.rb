@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_140246) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_26_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -18,6 +18,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_26_140246) do
     t.boolean "audio_only", default: false
     t.bigint "chat_id", null: false
     t.datetime "created_at", null: false
+    t.datetime "deleted_at"
     t.text "error", default: "", null: false
     t.bigint "file_size"
     t.text "output_path", default: "", null: false
@@ -27,6 +28,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_26_140246) do
     t.bigint "user_id", null: false
     t.index ["chat_id"], name: "index_downloads_on_chat_id"
     t.index ["created_at"], name: "index_downloads_on_created_at"
+    t.index ["deleted_at"], name: "index_downloads_on_deleted_at"
     t.index ["status"], name: "index_downloads_on_status"
     t.index ["user_id"], name: "index_downloads_on_user_id"
   end

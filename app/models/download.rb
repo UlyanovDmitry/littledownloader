@@ -1,5 +1,9 @@
 class Download < ApplicationRecord
+  acts_as_paranoid
+
   belongs_to :user
+
+  default_scope { where(deleted_at: nil) }
 
   enum :status, {
     queued: 'queued',
