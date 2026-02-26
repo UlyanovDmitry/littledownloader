@@ -16,11 +16,18 @@ class DownloadJob < ApplicationJob
     )
 
     result = downloader.download
+    Rails.logger.info("[DownloadJob] Downloader result: #{result.inspect}")
 
     update_params = { status: :done }
     if result.is_a?(String)
       update_params[:output_path] = result
-      update_params[:file_size] = File.size(result) if File.exist?(result)
+      exists = File.exist?(result)
+      Rails.logger.debug("[DownloadJob] File exists at #{result}: #{exists}")
+      if exists
+        size = File.size(result)
+        Rails.logger.debug("[DownloadJob] File size: #{size}")
+        update_params[:file_size] = size
+      end
       filename = File.basename(result)
     else
       filename = 'unknown'
