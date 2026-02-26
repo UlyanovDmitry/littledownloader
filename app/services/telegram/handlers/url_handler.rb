@@ -7,7 +7,14 @@ module Telegram
         url = extract_url
         audio_only = msg.text.include?('audio-only')
 
-        YtdlpDownloader.new(url, audio_only: audio_only).download
+        download = Download.create!(
+          user: user,
+          chat_id: chat_id,
+          url: url,
+          status: :queued
+        )
+
+        DownloadJob.perform_later(download.id, audio_only: audio_only)
       end
 
       private
