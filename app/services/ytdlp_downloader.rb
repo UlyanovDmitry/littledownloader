@@ -55,6 +55,7 @@ class YtdlpDownloader
     out_template = File.join(target_dir, '%(title)s.%(ext)s')
 
     cmd = %w[yt-dlp --no-color --newline]
+    cmd += ['--progress'] if defined?(Rails) && !Rails.env.production?
     cmd += ['--print', 'after_move:filepath']
     cmd += ['--extractor-args', 'youtube:player_client=web']
     cmd += ['-o', out_template]
@@ -81,7 +82,7 @@ class YtdlpDownloader
     Open3.popen2e(*cmd_ary) do |_stdin, out, wait|
       out.each do |line|
         stripped_line = line.strip
-        Rails.logger.debug("[yt-dlp] #{stripped_line}") if defined?(Rails)
+        Rails.logger.info("[yt-dlp] #{stripped_line}") if defined?(Rails)
 
         # Если строка выглядит как абсолютный путь и содержит расширение (из-за --print after_move:filepath)
         if stripped_line.start_with?('/') && File.extname(stripped_line).present?

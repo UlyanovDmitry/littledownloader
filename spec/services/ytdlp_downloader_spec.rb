@@ -20,7 +20,7 @@ RSpec.describe YtdlpDownloader do
 
     it 'calls yt-dlp with correct arguments for video and moves file' do
       expected_cmd = [
-        'yt-dlp', '--no-color', '--newline',
+        'yt-dlp', '--no-color', '--newline', '--progress',
         '--print', 'after_move:filepath',
         '--extractor-args', 'youtube:player_client=web',
         '-o', "#{tmp_dir}/%(title)s.%(ext)s",
@@ -46,7 +46,7 @@ RSpec.describe YtdlpDownloader do
       allow(downloader).to receive(:ensure_bin!).and_return(true)
 
       expected_cmd = [
-        'yt-dlp', '--no-color', '--newline',
+        'yt-dlp', '--no-color', '--newline', '--progress',
         '--print', 'after_move:filepath',
         '--extractor-args', 'youtube:player_client=web',
         '-o', "#{tmp_dir}/%(title)s.%(ext)s",
