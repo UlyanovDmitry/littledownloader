@@ -46,7 +46,11 @@ class YtdlpDownloader
   private
 
   def ensure_bin!(name)
-    return if system("which #{name} >/dev/null 2>&1")
+    path = ENV['PATH'].split(File::PATH_SEPARATOR).any? do |dir|
+      File.executable?(File.join(dir, name))
+    end
+
+    return if path
 
     raise DownloadError, "Required binary `#{name}` is missing. Install via Homebrew: brew install #{name}"
   end
