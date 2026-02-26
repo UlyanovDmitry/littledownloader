@@ -37,6 +37,7 @@ class YtdlpDownloader
     out_template = File.join(@download_dir, '%(title)s.%(ext)s')
 
     cmd = %w[yt-dlp --no-color --newline]
+    cmd += ['--print', 'after_move:filepath']
     cmd += ['--extractor-args', 'youtube:player_client=web']
     cmd += ['-o', out_template]
     cmd += ['--ignore-errors', '--no-mtime']
@@ -63,6 +64,12 @@ class YtdlpDownloader
       out.each do |line|
         stripped_line = line.strip
         Rails.logger.debug("[yt-dlp] #{stripped_line}") if defined?(Rails)
+
+        # Если строка выглядит как абсолютный путь и содержит расширение (из-за --print after_move:filepath)
+        if stripped_line.start_with?('/') && File.extname(stripped_line).present?
+          output_path = stripped_line
+        end
+
         last_lines << stripped_line
         last_lines.shift if last_lines.size > 10
       end
@@ -74,6 +81,6 @@ class YtdlpDownloader
       raise DownloadError, "Command failed with exit status #{status.exitstatus}\nDetails:\n#{error_details}"
     end
 
-    true
+    output_path
   end
 end

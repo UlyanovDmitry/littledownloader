@@ -11,3 +11,7 @@ en:
         message: "Hi! Send me a link and I’ll try to process it."
       whoami_command:
         message: "Your Telegram user_id: %{telegram_id}\nUsername: @%{username}"
+      download:
+        queued: "✅ Accepted. Download queued.\nID: %{id}"
+        success: "✅ Download finished.\nID: %{id}\n%{filename}"
+        failed: "❌ Download failed.\nID: %{id}\n%{error}"

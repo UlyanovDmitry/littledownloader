@@ -18,12 +18,32 @@ class DownloadJob < ApplicationJob
     result = downloader.download
 
     update_params = { status: :done }
-    update_params[:output_path] = result if result.is_a?(String)
+    if result.is_a?(String)
+      update_params[:output_path] = result
+      filename = File.basename(result)
+    else
+      filename = 'unknown'
+    end
 
     download.update!(update_params)
+
+    TelegramClient.send_message(
+      chat_id: download.chat_id,
+      text: I18n.t('telegram.handlers.download.success', id: download.id, filename: filename)
+    )
   rescue StandardError => e
-    Rails.logger.error("[DownloadJob] Error downloading #{download.url}: #{e.message}")
-    download.update!(status: :failed, error: e.message)
+    download ||= Download.find_by(id: download_id)
+    if download
+      Rails.logger.error("[DownloadJob] Error downloading #{download.url}: #{e.message}")
+      download.update!(status: :failed, error: e.message)
+
+      TelegramClient.send_message(
+        chat_id: download.chat_id,
+        text: I18n.t('telegram.handlers.download.failed', id: download.id, error: e.message)
+      )
+    else
+      Rails.logger.error("[DownloadJob] Error with unknown download_id #{download_id}: #{e.message}")
+    end
     raise e
   end
 end

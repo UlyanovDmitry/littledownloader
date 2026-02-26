@@ -10,3 +10,7 @@ ru:
         message: "Привет! Пришли ссылку, я попробую её обработать."
       whoami_command:
         message: "Твой Telegram user_id: %{telegram_id}\nUsername: @%{username}"
+      download:
+        queued: "✅ Принял. Скачивание поставлено в очередь.\nID: %{id}"
+        success: "✅ Загрузка завершена.\nID: %{id}\n%{filename}"
+        failed: "❌ Загрузка не удалась.\nID: %{id}\n%{error}"

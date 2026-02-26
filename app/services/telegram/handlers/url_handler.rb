@@ -16,6 +16,10 @@ module Telegram
         )
 
         DownloadJob.perform_later(download.id)
+        TelegramClient.send_message(
+          chat_id: chat_id,
+          text: I18n.t('telegram.handlers.download.queued', id: download.id)
+        )
       end
 
       private
