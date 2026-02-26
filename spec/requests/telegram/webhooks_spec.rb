@@ -5,8 +5,8 @@ RSpec.describe "Telegram::Webhooks", type: :request do
   let(:webhook_header_token) { "header_token_456" }
 
   before do
-    allow(Rails.application.credentials).to receive(:dig).with(:telegram, :webhook_secret).and_return(webhook_secret)
     stub_const("ENV", ENV.to_h.merge("TELEGRAM_WEBHOOK_HEADER_TOKEN" => webhook_header_token))
+    stub_const("ENV", ENV.to_h.merge("TELEGRAM_WEBHOOK_SECRET" => webhook_secret))
   end
 
   describe "POST /telegram/webhook/:secret" do
