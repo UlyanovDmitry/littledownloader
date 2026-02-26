@@ -22,7 +22,7 @@ class Telegram::WebhooksController < ApplicationController
 
   def verify_secret!
     got = request.headers['X-Telegram-Bot-Api-Secret-Token'].to_s
-    raise ArgumentError, 'X-Telegram-Bot-Api-Secret-Token header is missing' if got.blank?
+    return head :unauthorized if got.blank?
     head :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(got, webhook_header_token)
   end
 end

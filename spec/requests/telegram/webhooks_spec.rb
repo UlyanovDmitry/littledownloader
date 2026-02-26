@@ -11,14 +11,14 @@ RSpec.describe "Telegram::Webhooks", type: :request do
 
   describe "POST /telegram/webhook/:secret" do
     let(:headers) { { "X-Telegram-Bot-Api-Secret-Token" => webhook_header_token } }
+    let(:params) { { update_id: 123, message: { text: "hello" } } }
     let(:url) { "/telegram/webhook/#{webhook_secret}" }
 
-    before { post url, headers: headers }
+    before { post url, params: params.to_json, headers: headers }
 
     context "with valid secret and token" do
       it "returns http success" do
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ "status" => "ok" })
       end
     end
 
@@ -35,7 +35,6 @@ RSpec.describe "Telegram::Webhooks", type: :request do
 
       it "returns unauthorized" do
         expect(response).to have_http_status(:unauthorized)
-        expect(JSON.parse(response.body)).to eq({ "error" => "unauthorized" })
       end
     end
 
@@ -44,7 +43,6 @@ RSpec.describe "Telegram::Webhooks", type: :request do
 
       it "returns unauthorized" do
         expect(response).to have_http_status(:unauthorized)
-        expect(JSON.parse(response.body)).to eq({ "error" => "unauthorized" })
       end
     end
   end

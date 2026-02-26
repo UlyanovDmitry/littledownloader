@@ -6,7 +6,7 @@ module Telegram
       def call
         url = extract_url
         audio_only = msg.text.include?('audio-only')
-        
+
         YtdlpDownloader.new(url, audio_only: audio_only).download
       end
 

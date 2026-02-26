@@ -23,7 +23,7 @@ RSpec.describe YtdlpDownloader do
         '--embed-metadata', '--embed-thumbnail',
         url
       ]
-      
+
       expect(subject).to receive(:run!).with(expected_cmd).and_return(true)
       subject.download
     end
@@ -31,7 +31,7 @@ RSpec.describe YtdlpDownloader do
     it 'calls yt-dlp with correct arguments for audio-only' do
       downloader = described_class.new(url, download_dir: download_dir, audio_only: true)
       allow(downloader).to receive(:ensure_bin!).and_return(true)
-      
+
       expected_cmd = [
         'yt-dlp', '--no-color', '--newline',
         '-o', "#{download_dir}/%(title)s.%(ext)s",
@@ -40,14 +40,14 @@ RSpec.describe YtdlpDownloader do
         '--embed-metadata', '--embed-thumbnail',
         url
       ]
-      
+
       expect(downloader).to receive(:run!).with(expected_cmd).and_return(true)
       downloader.download
     end
 
     it 'raises DownloadError if command fails' do
       allow(Open3).to receive(:popen2e).and_yield(nil, [], double(value: double(success?: false, exitstatus: 1)))
-      
+
       expect { subject.download }.to raise_error(YtdlpDownloader::DownloadError, /Command failed/)
     end
   end
