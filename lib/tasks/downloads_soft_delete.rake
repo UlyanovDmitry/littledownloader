@@ -1,5 +1,6 @@
 namespace :downloads do
   namespace :soft_delete do
+    # rake "downloads:soft_delete:one[783fc074-4fea-46e4-b8ba-410da9fe9c25]"
     desc 'Soft delete one download by UUID: rake downloads:soft_delete:one[UUID]'
     task :one, [:uuid] => :environment do |_task, args|
       uuid = args[:uuid]
@@ -9,6 +10,7 @@ namespace :downloads do
       puts "Soft-deleted downloads: #{deleted_count}"
     end
 
+    # rake "downloads:soft_delete:by_user[1]"
     desc 'Soft delete all downloads by user id: rake downloads:soft_delete:by_user[USER_ID]'
     task :by_user, [:user_id] => :environment do |_task, args|
       user_id = args[:user_id]
@@ -26,6 +28,7 @@ namespace :downloads do
   end
 
   namespace :restore do
+    # rake "downloads:restore:one[783fc074-4fea-46e4-b8ba-410da9fe9c25]"
     desc 'Restore one download by UUID: rake downloads:restore:one[UUID]'
     task :one, [:uuid] => :environment do |_task, args|
       uuid = args[:uuid]
@@ -35,6 +38,7 @@ namespace :downloads do
       puts "Restored downloads: #{restored_count}"
     end
 
+    # rake "downloads:restore:by_user[1]"
     desc 'Restore all downloads by user id: rake downloads:restore:by_user[USER_ID]'
     task :by_user, [:user_id] => :environment do |_task, args|
       user_id = args[:user_id]

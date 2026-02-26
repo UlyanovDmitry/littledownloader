@@ -11,7 +11,8 @@ module Downloads
     end
 
     def self.all!
-      new(Download.only_deleted).call
+      download_scope = Download.only_deleted
+      new(download_scope).call
     end
 
     def initialize(scope)

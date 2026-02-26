@@ -1,15 +1,18 @@
 module Downloads
   class SoftDeleteService
     def self.by_uuid!(uuid)
-      new(Download.where(id: uuid)).call
+      downloads_scope = Download.where(id: uuid)
+      new(downloads_scope).call
     end
 
     def self.by_user!(user_id)
-      new(Download.where(user_id: user_id)).call
+      downloads_scope = Download.where(user_id: user_id)
+      new(downloads_scope).call
     end
 
     def self.all!
-      new(Download.all).call
+      downloads_scope = Download.all
+      new(downloads_scope).call
     end
 
     def initialize(scope)
@@ -19,8 +22,13 @@ module Downloads
     def call
       affected = 0
 
+      record_count = scope.count
+      # progress_bar = ProgressBar.create(total: record_count, format: '%a %e %P% Processed: %c from %C')
+      progress_bar = ProgressBar.create(total: record_count) if Rails.env.development?
+
       scope.find_each do |download|
         soft_delete!(download)
+        progress_bar.increment if Rails.env.development?
         affected += 1
       end
 
