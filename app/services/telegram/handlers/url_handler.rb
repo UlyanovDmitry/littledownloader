@@ -11,10 +11,11 @@ module Telegram
           user: user,
           chat_id: chat_id,
           url: url,
-          status: :queued
+          status: :queued,
+          audio_only: audio_only
         )
 
-        DownloadJob.perform_later(download.id, audio_only: audio_only)
+        DownloadJob.perform_later(download.id)
       end
 
       private

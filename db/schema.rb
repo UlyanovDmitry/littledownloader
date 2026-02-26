@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_123846) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_26_124425) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "downloads", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "audio_only", default: false
     t.bigint "chat_id", null: false
     t.datetime "created_at", null: false
     t.text "error", default: "", null: false

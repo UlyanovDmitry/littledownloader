@@ -1,7 +1,7 @@
 class DownloadJob < ApplicationJob
   queue_as :default
 
-  def perform(download_id, audio_only: false)
+  def perform(download_id)
     download = Download.find(download_id)
     download.update!(status: :running)
 
@@ -12,7 +12,7 @@ class DownloadJob < ApplicationJob
     downloader = YtdlpDownloader.new(
       download.url,
       download_dir: download_dir,
-      audio_only: audio_only
+      audio_only: download.audio_only
     )
 
     result = downloader.download
@@ -22,8 +22,8 @@ class DownloadJob < ApplicationJob
 
     download.update!(update_params)
   rescue StandardError => e
-    download.update!(status: :failed, error: e.message)
     Rails.logger.error("[DownloadJob] Error downloading #{download.url}: #{e.message}")
+    download.update!(status: :failed, error: e.message)
     raise e
   end
 end

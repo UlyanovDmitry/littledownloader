@@ -9,4 +9,5 @@ class Download < ApplicationRecord
   }, default: 'queued'
 
   validates :url, :chat_id, :status, presence: true
+  validates :audio_only, inclusion: { in: [true, false] }
 end
