@@ -5,6 +5,6 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  telegram_webhook_secret = Rails.application.credentials.dig(:telegram, :webhook_secret)
+  telegram_webhook_secret = ENV['TELEGRAM_WEBHOOK_SECRET']
   post "telegram/webhook/#{telegram_webhook_secret}" => "telegram/webhooks#handler", as: :telegram_webhook
 end
