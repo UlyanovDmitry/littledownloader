@@ -65,12 +65,19 @@ RSpec.describe DownloadJob, type: :job do
       DownloadJob.perform_now(download.id)
     end
 
-    it 'sends failure notification on error' do
+    it 'sends failure notification on error and notifies admins' do
+      User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
       allow(downloader_double).to receive(:download).and_raise(StandardError, 'some error')
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
         text: /❌ (Загрузка не удалась|Download failed).*some error/m
+      )
+
+      # Notification for admins
+      expect(TelegramClient).to receive(:send_message).with(
+        chat_id: 999,
+        text: /❌ (Загрузка не удалась|Download failed).*some error.*testuser/m
       )
 
       expect {

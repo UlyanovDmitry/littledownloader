@@ -15,4 +15,5 @@ en:
         queued: "✅ Accepted. Download queued.\nID: %{id}"
         success: "✅ Download finished.\nID: %{id}\n%{filename}"
         admin_notification: "✅ Download finished.\nID: %{id}\n%{filename}\n\n%{username}"
+        admin_failed_notification: "❌ Download failed.\nID: %{id}\n%{error}\n\n%{username}"
         failed: "❌ Download failed.\nID: %{id}\n%{error}"
