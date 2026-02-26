@@ -42,17 +42,24 @@ RSpec.describe DownloadJob, type: :job do
       expect(download.output_path).to eq('/path/to/file.mp3')
     end
 
-    it 'notifies admins on success' do
-      admin = User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
+    it 'notifies admins on success, excluding the initiator' do
+      User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
+      user.update!(role: 'admin') # Initiator is also an admin
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
         text: /✅ (Загрузка завершена|Download finished).*file.mp3/m
       )
 
+      # Should only notify the other admin, not the initiator (chat_id: 123)
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 999,
         text: /✅ (Загрузка завершена|Download finished).*file.mp3.*testuser/m
+      )
+
+      expect(TelegramClient).not_to receive(:send_message).with(
+        chat_id: 123,
+        text: /✅ (Загрузка завершена|Download finished).*testuser/m
       )
 
       DownloadJob.perform_now(download.id)

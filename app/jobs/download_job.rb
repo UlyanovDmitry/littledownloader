@@ -51,7 +51,7 @@ class DownloadJob < ApplicationJob
   private
 
   def notify_admins(download, filename)
-    User.where(role: 'admin').find_each do |admin|
+    User.where(role: 'admin').where.not(id: download.user_id).find_each do |admin|
       TelegramClient.send_message(
         chat_id: admin.telegram_user_id,
         text: I18n.t(
