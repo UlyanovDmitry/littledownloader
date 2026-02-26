@@ -69,4 +69,4 @@ jobs:
       - name: Prepare database
         run: bin/rails db:test:prepare
       - name: Run RSpec tests
-        run: bundle exec rspec --format RspecGithub::Formatter
+        run: bundle exec rspec --format RSpec::Github::Formatter
