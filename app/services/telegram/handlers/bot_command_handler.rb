@@ -7,13 +7,14 @@ module Telegram
         case command_name
         when 'start'
           TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.start_command.message'))
-        when 'whoami'
+        when 'info'
           TelegramClient.send_message(
             chat_id:,
             text: I18n.t(
-              'telegram.handlers.whoami_command.message',
+              'telegram.handlers.info_command.message',
               telegram_id: user.telegram_user_id,
-              username: user.username
+              username: user.username,
+              disk_usage: disk_usage_text
             )
           )
         else
@@ -22,6 +23,11 @@ module Telegram
       end
 
       private
+
+      def disk_usage_text
+        total_bytes = user.downloads.where(status: :done).sum(:file_size)
+        ActiveSupport::NumberHelper.number_to_human_size(total_bytes)
+      end
 
       def command_name
         msg.text.delete_prefix('/').downcase

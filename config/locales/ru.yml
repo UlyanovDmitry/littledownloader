@@ -8,8 +8,8 @@ ru:
         unknown_command: "Неизвестная команда"
       start_command:
         message: "Привет! Пришли ссылку, я попробую её обработать."
-      whoami_command:
-        message: "Твой Telegram user_id: %{telegram_id}\nUsername: @%{username}"
+      info_command:
+        message: "Твой Telegram user_id: %{telegram_id}\nUsername: @%{username}\nЗанято на диске: %{disk_usage}"
       download:
         queued: "✅ Принял. Скачивание поставлено в очередь.\nID: %{id}"
         success: "✅ Загрузка завершена.\nID: %{id}\n%{filename}"

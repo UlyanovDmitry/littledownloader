@@ -30,7 +30,10 @@ RSpec.describe DownloadJob, type: :job do
       DownloadJob.perform_now(download.id)
     end
 
-    it 'updates download status to done and sends notification' do
+    it 'updates download status to done, records file size and sends notification' do
+      expect(File).to receive(:exist?).with('/path/to/file.mp3').and_return(true)
+      expect(File).to receive(:size).with('/path/to/file.mp3').and_return(1234)
+
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
         text: /✅ (Загрузка завершена|Download finished).*file.mp3/m
@@ -40,6 +43,7 @@ RSpec.describe DownloadJob, type: :job do
 
       expect(download.reload.status).to eq('done')
       expect(download.output_path).to eq('/path/to/file.mp3')
+      expect(download.file_size).to eq(1234)
     end
 
     it 'notifies admins on success, excluding the initiator' do

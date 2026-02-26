@@ -9,8 +9,8 @@ en:
         unknown_command: "Unknown command"
       start_command:
         message: "Hi! Send me a link and I’ll try to process it."
-      whoami_command:
-        message: "Your Telegram user_id: %{telegram_id}\nUsername: @%{username}"
+      info_command:
+        message: "Your Telegram user_id: %{telegram_id}\nUsername: @%{username}\nDisk usage: %{disk_usage}"
       download:
         queued: "✅ Accepted. Download queued.\nID: %{id}"
         success: "✅ Download finished.\nID: %{id}\n%{filename}"

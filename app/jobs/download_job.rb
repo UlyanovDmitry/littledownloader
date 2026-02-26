@@ -20,6 +20,7 @@ class DownloadJob < ApplicationJob
     update_params = { status: :done }
     if result.is_a?(String)
       update_params[:output_path] = result
+      update_params[:file_size] = File.size(result) if File.exist?(result)
       filename = File.basename(result)
     else
       filename = 'unknown'
