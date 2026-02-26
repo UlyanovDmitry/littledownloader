@@ -57,6 +57,8 @@ jobs:
     env:
       RAILS_ENV: test
       DATABASE_URL: postgres://postgres:postgres@localhost:5432
+      TELEGRAM_WEBHOOK_HEADER_TOKEN: test_secret_token
+      TELEGRAM_WEBHOOK_SECRET: telegram_webhook_secret
     steps:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
@@ -69,4 +71,4 @@ jobs:
       - name: Prepare database
         run: bin/rails db:test:prepare
       - name: Run RSpec tests
-        run: bundle exec rspec --format RspecGithub::Formatter
+        run: bundle exec rspec --format RSpec::Github::Formatter

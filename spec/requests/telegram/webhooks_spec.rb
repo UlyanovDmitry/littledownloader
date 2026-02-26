@@ -1,18 +1,18 @@
 require "rails_helper"
 
 RSpec.describe "Telegram::Webhooks", type: :request do
-  let(:webhook_secret) { "test_secret_123" }
   let(:webhook_header_token) { "header_token_456" }
+  let(:telegram_webhook_secret) { "telegram_webhook_secret" }
 
   before do
-    allow(Rails.application.credentials).to receive(:dig).with(:telegram, :webhook_secret).and_return(webhook_secret)
     stub_const("ENV", ENV.to_h.merge("TELEGRAM_WEBHOOK_HEADER_TOKEN" => webhook_header_token))
+    stub_const("ENV", ENV.to_h.merge("TELEGRAM_WEBHOOK_SECRET" => telegram_webhook_secret))
   end
 
   describe "POST /telegram/webhook/:secret" do
     let(:headers) { { "X-Telegram-Bot-Api-Secret-Token" => webhook_header_token } }
     let(:params) { { update_id: 123, message: { text: "hello" } } }
-    let(:url) { "/telegram/webhook/#{webhook_secret}" }
+    let(:url) { "/telegram/webhook/#{telegram_webhook_secret}" }
 
     before { post url, params: params.to_json, headers: headers }
 
