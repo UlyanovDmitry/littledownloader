@@ -23,7 +23,7 @@ class YtdlpDownloader
 
     FileUtils.mkdir_p(@download_dir)
 
-    # Создаем временную директорию для процесса скачивания
+    # Create a temporary directory for the download process
     tmp_dir = File.join(Dir.tmpdir, "ytdlp_#{SecureRandom.hex(8)}")
     FileUtils.mkdir_p(tmp_dir)
 
@@ -84,7 +84,7 @@ class YtdlpDownloader
         stripped_line = line.strip
         Rails.logger.info("[yt-dlp] #{stripped_line}") if defined?(Rails)
 
-        # Если строка выглядит как абсолютный путь и содержит расширение (из-за --print after_move:filepath)
+        # If the line looks like an absolute path that includes an extension (due to --print after_move:filepath)
         if stripped_line.start_with?('/') && File.extname(stripped_line).present?
           output_path = stripped_line
         end

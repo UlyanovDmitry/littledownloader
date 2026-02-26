@@ -28,7 +28,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
 
       expect(TelegramClient).to have_received(:send_message).with(
         chat_id: chat_id,
-        text: /✅ (Принял|Accepted).*#{download.id}/m
+        text: /✅ Accepted. Download queued.\nID: #{download.id}/m
       )
 
       expect(DownloadJob).to have_received(:perform_later).with(download.id)

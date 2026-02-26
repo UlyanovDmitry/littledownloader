@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_26_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_26_190001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,7 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_26_190000) do
     t.datetime "created_at", null: false
     t.text "first_name"
     t.text "last_name"
-    t.text "role"
+    t.string "role", default: "user"
     t.bigint "telegram_user_id"
     t.datetime "updated_at", null: false
     t.text "username"

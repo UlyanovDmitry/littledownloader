@@ -25,8 +25,8 @@ module Telegram
       private
 
       def extract_url
-        # Мы предполагаем что URL точно есть, так как этот хендлер был выбран
-        # Но на всякий случай найдем его среди сущностей или просто регуляркой
+        # We assume the URL is present because this handler was chosen
+        # But just in case, find it among the entities or with a regex
         msg.text.match(%r{https?://\S+})[0]
       end
     end

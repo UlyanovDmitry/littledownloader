@@ -20,14 +20,14 @@ module Users
 
       user = User.find_or_initialize_by(tg_id: tg_id)
 
-      # Обновляем профиль при каждом логине (безопасные поля)
+      # Update profile on each login (safe fields)
       user.tg_username = tg['username'] if tg.key?('username')
       user.first_name = tg['first_name'] if tg.key?('first_name')
       user.last_name = tg['last_name'] if tg.key?('last_name')
       user.photo_url = tg['photo_url'] if tg.key?('photo_url')
       # user.language_code = tg['language_code'] if tg.key?('language_code')
 
-      # Роль по умолчанию задана миграцией (student)
+      # Default role is assigned by the migration (user)
       user.save! if user.changed?
       user
     end

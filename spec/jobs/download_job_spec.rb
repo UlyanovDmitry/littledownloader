@@ -36,7 +36,7 @@ RSpec.describe DownloadJob, type: :job do
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
-        text: /✅ (Загрузка завершена|Download finished).*file.mp3/m
+        text: /✅ Download finished.*file.mp3/m
       )
 
       DownloadJob.perform_now(download.id)
@@ -52,18 +52,18 @@ RSpec.describe DownloadJob, type: :job do
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
-        text: /✅ (Загрузка завершена|Download finished).*file.mp3/m
+        text: /✅ Download finished.*file.mp3/m
       )
 
       # Should only notify the other admin, not the initiator (chat_id: 123)
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 999,
-        text: /✅ (Загрузка завершена|Download finished).*file.mp3.*testuser/m
+        text: /✅ Download finished.*file.mp3.*testuser/m
       )
 
       expect(TelegramClient).not_to receive(:send_message).with(
         chat_id: 123,
-        text: /✅ (Загрузка завершена|Download finished).*testuser/m
+        text: /✅ Download finished.*testuser/m
       )
 
       DownloadJob.perform_now(download.id)
@@ -75,13 +75,13 @@ RSpec.describe DownloadJob, type: :job do
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
-        text: /❌ (Загрузка не удалась|Download failed).*some error/m
+        text: /❌ Download failed.*some error/m
       )
 
       # Notification for admins
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 999,
-        text: /❌ (Загрузка не удалась|Download failed).*some error.*testuser/m
+        text: /❌ Download failed.*some error.*testuser/m
       )
 
       expect {
