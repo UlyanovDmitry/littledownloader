@@ -64,7 +64,7 @@ test:
   port: 5432
   database: littledownloader_test
   username: littledownloader
-  password: littledownloader
+  password: <%= ENV["LITTLEDOWNLOADER_DATABASE_PASSWORD"] %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -96,8 +96,10 @@ production:
   primary: &primary_production
     <<: *default
     database: littledownloader_production
-    username: littledownloader
+    username: <%= ENV["LITTLEDOWNLOADER_DATABASE_USERNAME"] %>
     password: <%= ENV["LITTLEDOWNLOADER_DATABASE_PASSWORD"] %>
+    host: <%= ENV["LITTLEDOWNLOADER_DATABASE_HOST"] %>
+    port: <%= ENV["LITTLEDOWNLOADER_DATABASE_PORT"] %>
   cache:
     <<: *primary_production
     database: littledownloader_production_cache
