@@ -16,8 +16,9 @@ RSpec.describe YtdlpDownloader do
     it 'calls yt-dlp with correct arguments for video' do
       expected_cmd = [
         'yt-dlp', '--no-color', '--newline',
+        '--extractor-args', 'youtube:player_client=web',
         '-o', "#{download_dir}/%(title)s.%(ext)s",
-        '--ignore-errors',
+        '--ignore-errors', '--no-mtime',
         '-f', YtdlpDownloader::DEFAULT_FORMAT_SELECTOR,
         '--merge-output-format', YtdlpDownloader::DEFAULT_MERGE_FORMAT,
         '--embed-metadata', '--embed-thumbnail',
@@ -34,8 +35,9 @@ RSpec.describe YtdlpDownloader do
 
       expected_cmd = [
         'yt-dlp', '--no-color', '--newline',
+        '--extractor-args', 'youtube:player_client=web',
         '-o', "#{download_dir}/%(title)s.%(ext)s",
-        '--ignore-errors',
+        '--ignore-errors', '--no-mtime',
         '-x', '--audio-format', YtdlpDownloader::DEFAULT_AUDIO_FORMAT,
         '--embed-metadata', '--embed-thumbnail',
         url

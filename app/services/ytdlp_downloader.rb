@@ -34,12 +34,12 @@ class YtdlpDownloader
   end
 
   def build_command
-    # Шаблон имени файла: скачиваем в указанную директорию
     out_template = File.join(@download_dir, '%(title)s.%(ext)s')
 
     cmd = %w[yt-dlp --no-color --newline]
+    cmd += ['--extractor-args', 'youtube:player_client=web']
     cmd += ['-o', out_template]
-    cmd += ['--ignore-errors']
+    cmd += ['--ignore-errors', '--no-mtime']
 
     if @audio_only
       cmd += ['-x', '--audio-format', DEFAULT_AUDIO_FORMAT]
@@ -56,14 +56,20 @@ class YtdlpDownloader
 
   def run!(cmd_ary)
     status = nil
+    last_lines = []
     Open3.popen2e(*cmd_ary) do |_stdin, out, wait|
-      # В реальном приложении можно логировать вывод или отправлять прогресс пользователю
-      out.each { |line| Rails.logger.info("[yt-dlp] #{line.strip}") if defined?(Rails) }
+      out.each do |line|
+        stripped_line = line.strip
+        Rails.logger.debug("[yt-dlp] #{stripped_line}") if defined?(Rails)
+        last_lines << stripped_line
+        last_lines.shift if last_lines.size > 10
+      end
       status = wait.value
     end
 
     unless status.success?
-      raise DownloadError, "Command failed with exit status #{status.exitstatus}"
+      error_details = last_lines.join("\n")
+      raise DownloadError, "Command failed with exit status #{status.exitstatus}\nDetails:\n#{error_details}"
     end
 
     true
