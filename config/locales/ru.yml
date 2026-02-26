@@ -13,4 +13,5 @@ ru:
       download:
         queued: "✅ Принял. Скачивание поставлено в очередь.\nID: %{id}"
         success: "✅ Загрузка завершена.\nID: %{id}\n%{filename}"
+        admin_notification: "✅ Загрузка завершена.\nID: %{id}\n%{filename}\n\n%{username}"
         failed: "❌ Загрузка не удалась.\nID: %{id}\n%{error}"

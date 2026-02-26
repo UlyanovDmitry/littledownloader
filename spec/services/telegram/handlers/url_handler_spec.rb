@@ -20,7 +20,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
 
     it 'creates a Download record, sends message and enqueues job' do
       expect { subject.call }.to change(Download, :count).by(1)
-      
+
       download = Download.last
       expect(download.url).to eq(url)
       expect(download.audio_only).to be false
@@ -30,7 +30,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
         chat_id: chat_id,
         text: /✅ (Принял|Accepted).*#{download.id}/m
       )
-      
+
       expect(DownloadJob).to have_received(:perform_later).with(download.id)
     end
 

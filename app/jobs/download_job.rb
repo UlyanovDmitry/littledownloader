@@ -31,6 +31,8 @@ class DownloadJob < ApplicationJob
       chat_id: download.chat_id,
       text: I18n.t('telegram.handlers.download.success', id: download.id, filename: filename)
     )
+
+    notify_admins(download, filename)
   rescue StandardError => e
     download ||= Download.find_by(id: download_id)
     if download
@@ -45,5 +47,20 @@ class DownloadJob < ApplicationJob
       Rails.logger.error("[DownloadJob] Error with unknown download_id #{download_id}: #{e.message}")
     end
     raise e
+  end
+  private
+
+  def notify_admins(download, filename)
+    User.where(role: 'admin').find_each do |admin|
+      TelegramClient.send_message(
+        chat_id: admin.telegram_user_id,
+        text: I18n.t(
+          'telegram.handlers.download.admin_notification',
+          id: download.id,
+          filename: filename,
+          username: download.user.username
+        )
+      )
+    end
   end
 end
