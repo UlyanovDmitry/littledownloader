@@ -11,6 +11,9 @@
 ARG RUBY_VERSION=4.0.1
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
+########################
+# build (common)
+########################
 # Rails app lives here
 WORKDIR /rails
 
@@ -69,6 +72,24 @@ COPY --chown=rails:rails --from=build /rails /rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
+########################
+# jobs target
+########################
+FROM base AS jobs
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg curl python3 unzip \
+  && curl -fsSL https://deno.land/install.sh | sh \
+  && ln -s /root/.deno/bin/deno /usr/local/bin/deno \
+  && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+  && chmod a+rx /usr/local/bin/yt-dlp \
+  && rm -rf /var/lib/apt/lists/*
+# ✅ Working version verified as 2026.02.04
+CMD ["./bin/jobs", "start"]
+
+########################
+# api target
+########################
+FROM base AS api
 # Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]

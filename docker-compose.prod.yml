@@ -1,8 +1,11 @@
 name: littledownloader_production
 
 services:
-  web:
-    build: .
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
     env_file:
       - .env.prod
     environment:
@@ -17,12 +20,14 @@ services:
     restart: unless-stopped
 
   jobs:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: jobs
     env_file:
       - .env.prod
     environment:
       RAILS_ENV: production
       DOWNLOADS_DIR: /downloads
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-    entrypoint: ['bin/jobs', 'start']
     restart: unless-stopped
