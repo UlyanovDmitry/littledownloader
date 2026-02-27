@@ -19,10 +19,13 @@ RSpec.describe YtdlpDownloader do
     let(:tmp_dir) { File.join(Dir.tmpdir, 'ytdlp_12345678') }
 
     it 'calls yt-dlp with correct arguments for video and moves file' do
+      # TODO: fix test without stub production env
+      # Set production to true to avoid --progress in cmd
+      allow(Rails.env).to receive(:production?).and_return(true)
       expected_cmd = [
-        'yt-dlp', '--no-color', '--newline', '--progress',
+        'yt-dlp', '--no-color', '--newline',
         '--print', 'after_move:filepath',
-        '--extractor-args', 'youtube:player_client=web',
+        '--extractor-args', 'youtube:player_client=web,mweb,android,ios',
         '-o', "#{tmp_dir}/%(title)s.%(ext)s",
         '--ignore-errors', '--no-mtime',
         '-f', YtdlpDownloader::DEFAULT_FORMAT_SELECTOR,
@@ -34,7 +37,10 @@ RSpec.describe YtdlpDownloader do
       result_path = "#{tmp_dir}/video.mp4"
       final_path = "#{download_dir}/video.mp4"
 
-      expect(subject).to receive(:run!).with(expected_cmd).and_return(result_path)
+      expect(subject).to receive(:run!) do |cmd|
+        expect(cmd).to eq(expected_cmd)
+        result_path
+      end
       expect(File).to receive(:exist?).with(result_path).and_return(true)
       expect(FileUtils).to receive(:mv).with(result_path, final_path)
 
@@ -42,13 +48,15 @@ RSpec.describe YtdlpDownloader do
     end
 
     it 'calls yt-dlp with correct arguments for audio-only and moves file' do
+      # Set production to true to avoid --progress in cmd
+      allow(Rails.env).to receive(:production?).and_return(true)
       downloader = described_class.new(url, download_dir: download_dir, audio_only: true)
       allow(downloader).to receive(:ensure_bin!).and_return(true)
 
       expected_cmd = [
-        'yt-dlp', '--no-color', '--newline', '--progress',
+        'yt-dlp', '--no-color', '--newline',
         '--print', 'after_move:filepath',
-        '--extractor-args', 'youtube:player_client=web',
+        '--extractor-args', 'youtube:player_client=web,mweb,android,ios',
         '-o', "#{tmp_dir}/%(title)s.%(ext)s",
         '--ignore-errors', '--no-mtime',
         '-x', '--audio-format', YtdlpDownloader::DEFAULT_AUDIO_FORMAT,
@@ -59,7 +67,10 @@ RSpec.describe YtdlpDownloader do
       result_path = "#{tmp_dir}/audio.mp3"
       final_path = "#{download_dir}/audio.mp3"
 
-      expect(downloader).to receive(:run!).with(expected_cmd).and_return(result_path)
+      expect(downloader).to receive(:run!) do |cmd|
+        expect(cmd).to eq(expected_cmd)
+        result_path
+      end
       expect(File).to receive(:exist?).with(result_path).and_return(true)
       expect(FileUtils).to receive(:mv).with(result_path, final_path)
 

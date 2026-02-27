@@ -69,16 +69,17 @@ RSpec.describe DownloadJob, type: :job do
       DownloadJob.perform_now(download.id)
     end
 
-    it 'sends failure notification on error and notifies admins' do
+    it 'sends simple failure notification for regular users' do
       User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
       allow(downloader_double).to receive(:download).and_raise(StandardError, 'some error')
 
+      # Regular user gets simple error message without details
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
-        text: /❌ Download failed.*some error/m
+        text: /❌ Download failed\.\nID: #{download.id}/
       )
 
-      # Notification for admins
+      # Admin still gets full error message in notification
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 999,
         text: /❌ Download failed.*some error.*testuser/m
@@ -90,6 +91,21 @@ RSpec.describe DownloadJob, type: :job do
 
       expect(download.reload.status).to eq('failed')
       expect(download.error).to eq('some error')
+    end
+
+    it 'sends full failure notification for admin users' do
+      user.update!(role: 'admin')
+      allow(downloader_double).to receive(:download).and_raise(StandardError, 'some error')
+
+      # Admin user gets full error message
+      expect(TelegramClient).to receive(:send_message).with(
+        chat_id: 456,
+        text: /❌ Download failed.*some error/m
+      )
+
+      expect {
+        DownloadJob.perform_now(download.id)
+      }.to raise_error(StandardError, 'some error')
     end
   end
 end

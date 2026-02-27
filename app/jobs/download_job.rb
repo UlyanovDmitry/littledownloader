@@ -47,9 +47,15 @@ class DownloadJob < ApplicationJob
       Rails.logger.error("[DownloadJob] Error downloading #{download.url}: #{e.message}")
       download.update!(status: :failed, error: e.message)
 
+      error_message = if download.user.admin?
+        I18n.t('telegram.handlers.download.failed', id: download.id, error: e.message)
+      else
+        I18n.t('telegram.handlers.download.simple_failed', id: download.id)
+      end
+
       TelegramClient.send_message(
         chat_id: download.chat_id,
-        text: I18n.t('telegram.handlers.download.failed', id: download.id, error: e.message)
+        text: error_message
       )
 
       notify_admins_on_failure(download, e.message)
