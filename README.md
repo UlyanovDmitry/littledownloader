@@ -7,28 +7,24 @@ No files are uploaded back to Telegram — the bot only manages downloads and st
 
 ## Features
 
-- Telegram bot with webhook support
-- Async background jobs (Asynq + Redis)
+- Telegram bot
+- Background jobs via Solid Queue
 - Local file storage
-- Per-user and global storage quotas
-- Retry last download command
+- Per-user storage quotas
 - Admin notifications
-- Basic rate limiting and authorization
 - PostgreSQL for persistence
-- Go-based, simple and fast
+- Rails 8 app, simple and fast
 
 ## Architecture
 
-- **bot-api** — Telegram webhook handler and business logic
-- **worker** — background downloader (yt-dlp + ffmpeg)
-- **PostgreSQL** — users, downloads, quotas
-- **Redis** — task queue (Asynq)
+- **web** — Telegram webhook handler and business logic (Rails)
+- **jobs** — background downloads (yt-dlp + ffmpeg)
+- **PostgreSQL** — users, downloads, quotas, queues
 
 ## Requirements
 
-- Go 1.22+
+- Ruby 4.0+
 - PostgreSQL
-- Redis
 - `yt-dlp` installed on the system
 - `ffmpeg` (recommended)
 
@@ -37,41 +33,41 @@ No files are uploaded back to Telegram — the bot only manages downloads and st
 The application is configured via environment variables:
 
 ```env
-TELEGRAM_TOKEN=your_bot_token
-WEBHOOK_HEADER_TOKEN=optional_secret
-DATABASE_URL=postgres://user:pass@localhost:5432/dbname
-REDIS_ADDR=localhost:6379
+TELEGRAM_WEBHOOK_HEADER_TOKEN=header_token_456
+TELEGRAM_BOT_TOKEN=telegram_bot_token
+TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 DOWNLOADS_DIR=/absolute/path/to/downloads
 ```
 
+## Bot Commands
+
+- `/start` — запуск
+- `/help` — помощь
+- `/info` — информация о профиле
+
+Parameters:
+- `audio-only` — скачать только аудио
+- `info` — показать информацию о загрузке
+
 ## Development
 
-Run database migrations:
+Start the app and Postgres with Docker Compose:
 
 ```bash
-make migrate-up
+docker compose up --build
 ```
 
-Run database migrations with Docker Compose:
+Start the app locally (requires a running Postgres):
 
 ```bash
-make dc-migrate-up
+bundle install
+bin/rails s -b 0.0.0.0 -p 3000
 ```
 
-Run bot API:
+Start background jobs:
 
 ```bash
-go run ./cmd/bot-api
-```
-
-Run worker:
-```bash
-go run ./cmd/worker
-```
-
-Run tests:
-```bash
-go test ./...
+bin/jobs start
 ```
 
 ## Docker
@@ -79,9 +75,9 @@ go test ./...
 Create a `.env` file (example):
 
 ```env
-TELEGRAM_TOKEN=your_bot_token
-WEBHOOK_SECRET=your_webhook_secret
-WEBHOOK_HEADER_TOKEN=optional_header_token
+TELEGRAM_WEBHOOK_HEADER_TOKEN=header_token_456
+TELEGRAM_BOT_TOKEN=telegram_bot_token
+TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 DOWNLOADS_DIR=/downloads
 DOWNLOADS_HOST_DIR=/absolute/path/to/downloads
 ```
@@ -91,13 +87,6 @@ Start everything:
 ```bash
 docker compose up --build
 ```
-
-Notes:
-- Migrations are not run automatically; apply them separately before starting the services.
-- Run migrations in Docker: `docker compose --profile manual run --rm migrate` with `GOOSE_CMD=up|down|status|reset`.
-- The bot API listens on port `8080` and exposes `/healthz`.
-- Asynqmon UI is available at `http://localhost:8081`.
-- Downloads are stored in the host directory set by `DOWNLOADS_HOST_DIR`.
 
 ## Notes
 - This project is designed for self-hosting.
