@@ -27,8 +27,8 @@ RSpec.describe Telegram::Handlers::BotCommandHandler do
       end
     end
 
-    context 'when command is /info' do
-      let(:text) { '/info' }
+    context 'when command is /my_info' do
+      let(:text) { '/my_info' }
       let(:user) { User.create!(telegram_user_id: 789, username: 'testuser') }
 
       before do

@@ -9,6 +9,8 @@ en:
         unknown_command: "Unknown command"
       start_command:
         message: "Hi! Send me a link and I’ll try to process it."
+      help_command:
+        message: "🤖 LittleDownloader\n\nSend a video link and I’ll reply with a file.\n\nSupported:\n• YouTube\n• Shorts\n\nCommands:\n/start — start\n/help — help\n/my_info — profile info\n\nParams:\naudio-only — download audio only\n\nIf something doesn’t download, try a different link."
       info_command:
         message: "Your Telegram user_id: %{telegram_id}\nUsername: @%{username}\nDisk usage: %{disk_usage}"
       download:

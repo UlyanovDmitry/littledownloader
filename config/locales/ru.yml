@@ -8,6 +8,8 @@ ru:
         unknown_command: "Неизвестная команда"
       start_command:
         message: "Привет! Пришли ссылку, я попробую её обработать."
+      help_command:
+        message: "🤖 LittleDownloader\n\nОтправь ссылку на видео — я пришлю файл в ответ.\n\nПоддерживается:\n• YouTube\n• Shorts\n\nКоманды:\n/start — запуск\n/help — помощь\n/my_info — информация о профиле\n\nПараметры:\naudio-only — скачать только аудио\n\nЕсли что-то не скачивается — попробуй другую ссылку."
       info_command:
         message: "Твой Telegram user_id: %{telegram_id}\nUsername: @%{username}\nЗанято на диске: %{disk_usage}"
       download:

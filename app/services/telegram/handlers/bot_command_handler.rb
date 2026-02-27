@@ -7,7 +7,9 @@ module Telegram
         case command_name
         when 'start'
           TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.start_command.message'))
-        when 'info'
+        when 'help'
+          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.help_command.message'))
+        when 'my_info'
           TelegramClient.send_message(
             chat_id:,
             text: I18n.t(
