@@ -44,7 +44,7 @@ COPY Gemfile Gemfile.lock ./
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
+    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495 \
     bundle exec bootsnap precompile -j 1 --gemfile
 
 # Copy application code
@@ -58,7 +58,7 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 
 # Final stage for app image
-FROM base
+FROM base AS app-base
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
@@ -75,7 +75,8 @@ ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 ########################
 # jobs target
 ########################
-FROM base AS jobs
+FROM app-base AS jobs
+USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ffmpeg curl python3 unzip \
   && curl -fsSL https://deno.land/install.sh | sh \
@@ -83,13 +84,14 @@ RUN apt-get update \
   && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
   && chmod a+rx /usr/local/bin/yt-dlp \
   && rm -rf /var/lib/apt/lists/*
+USER rails
 # ✅ Working version verified as 2026.02.04
 CMD ["./bin/jobs", "start"]
 
 ########################
 # api target
 ########################
-FROM base AS api
+FROM app-base AS api
 # Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
 CMD ["./bin/thrust", "./bin/rails", "server"]
