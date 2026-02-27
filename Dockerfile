@@ -83,7 +83,7 @@ USER root
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ffmpeg curl python3 unzip \
   && curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh \
-  && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+  && curl -L -f https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
   && chmod a+rx /usr/local/bin/yt-dlp \
   && rm -rf /var/lib/apt/lists/*
 USER rails
