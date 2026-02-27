@@ -6,106 +6,93 @@ RSpec.describe DownloadJob, type: :job do
     Download.create!(
       user: user,
       chat_id: 456,
-      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      url: 'https://example.com/videos/watch?v=dQw4w',
       audio_only: true
     )
   end
 
   describe '#perform' do
-    let(:downloader_double) { instance_double(YtdlpDownloader) }
+    let(:limits_checker) { instance_double(Downloads::LimitsChecker, call: true) }
+    let(:downloader) { instance_double(YtdlpDownloader, download: '/path/to/file.mp3') }
+    let(:notifier) { instance_double(Downloads::Notifier, notify_success: true, notify_failure: true) }
 
     before do
-      allow(YtdlpDownloader).to receive(:new).and_return(downloader_double)
-      allow(downloader_double).to receive(:download).and_return('/path/to/file.mp3')
-      allow(TelegramClient).to receive(:send_message)
+      allow(Downloads::LimitsChecker).to receive(:new).and_return(limits_checker)
+      allow(YtdlpDownloader).to receive(:new).and_return(downloader)
+      allow(Downloads::Notifier).to receive(:new).and_return(notifier)
+      allow(File).to receive(:exist?).with('/path/to/file.mp3').and_return(true)
+      allow(File).to receive(:size).with('/path/to/file.mp3').and_return(1234)
+      allow(FileUtils).to receive(:mkdir_p)
     end
 
-    it 'calls YtdlpDownloader with correct audio_only parameter from download record' do
+    it 'coordinates limits check, downloader, and success notification' do
+      expect(Downloads::LimitsChecker).to receive(:new).with(
+        download: download,
+        base_dir: kind_of(String)
+      ).and_return(limits_checker)
+      expect(limits_checker).to receive(:call)
       expect(YtdlpDownloader).to receive(:new).with(
         download.url,
         download_dir: /user_#{user.id}\z/,
         audio_only: true
-      )
+      ).and_return(downloader)
+      expect(downloader).to receive(:download).and_return('/path/to/file.mp3')
+      expect(Downloads::Notifier).to receive(:new).with(download).and_return(notifier)
+      expect(notifier).to receive(:notify_success).with('file.mp3')
 
-      DownloadJob.perform_now(download.id)
-    end
-
-    it 'updates download status to done, records file size and sends notification' do
-      expect(File).to receive(:exist?).with('/path/to/file.mp3').and_return(true)
-      expect(File).to receive(:size).with('/path/to/file.mp3').and_return(1234)
-
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 456,
-        text: /✅ Download finished.*file.mp3/m
-      )
-
-      DownloadJob.perform_now(download.id)
+      described_class.perform_now(download.id)
 
       expect(download.reload.status).to eq('done')
       expect(download.output_path).to eq('/path/to/file.mp3')
       expect(download.file_size).to eq(1234)
     end
 
-    it 'notifies admins on success, excluding the initiator' do
-      User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
-      user.update!(role: 'admin') # Initiator is also an admin
+    it 'marks download as done and uses unknown filename when downloader returns non-string' do
+      allow(downloader).to receive(:download).and_return(nil)
 
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 456,
-        text: /✅ Download finished.*file.mp3/m
-      )
+      expect(notifier).to receive(:notify_success).with('unknown')
 
-      # Should only notify the other admin, not the initiator (chat_id: 123)
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 999,
-        text: /✅ Download finished.*file.mp3.*testuser/m
-      )
+      described_class.perform_now(download.id)
 
-      expect(TelegramClient).not_to receive(:send_message).with(
-        chat_id: 123,
-        text: /✅ Download finished.*testuser/m
-      )
-
-      DownloadJob.perform_now(download.id)
+      expect(download.reload.status).to eq('done')
+      expect(download.output_path).to be_blank
+      expect(download.file_size).to be_nil
     end
 
-    it 'sends simple failure notification for regular users' do
-      User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
-      allow(downloader_double).to receive(:download).and_raise(StandardError, 'some error')
+    it 'does not store file_size when the downloaded file is missing' do
+      allow(File).to receive(:exist?).with('/path/to/file.mp3').and_return(false)
+      expect(File).not_to receive(:size)
 
-      # Regular user gets simple error message without details
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 456,
-        text: /❌ Download failed\.\nID: #{download.id}/
-      )
+      described_class.perform_now(download.id)
 
-      # Admin still gets full error message in notification
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 999,
-        text: /❌ Download failed.*some error.*testuser/m
-      )
+      expect(download.reload.status).to eq('done')
+      expect(download.output_path).to eq('/path/to/file.mp3')
+      expect(download.file_size).to be_nil
+    end
+
+    it 'marks download as failed and delegates failure notification when processing raises' do
+      error = YtdlpDownloader::DownloadError.new('some error')
+      allow(downloader).to receive(:download).and_raise(error)
+
+      expect(notifier).to receive(:notify_failure).with(error)
 
       expect {
-        DownloadJob.perform_now(download.id)
-      }.to raise_error(StandardError, 'some error')
+        described_class.perform_now(download.id)
+      }.to raise_error(YtdlpDownloader::DownloadError, 'some error')
 
       expect(download.reload.status).to eq('failed')
       expect(download.error).to eq('some error')
     end
 
-    it 'sends full failure notification for admin users' do
-      user.update!(role: 'admin')
-      allow(downloader_double).to receive(:download).and_raise(StandardError, 'some error')
+    it 're-raises errors when the download record no longer exists' do
+      missing_id = download.id
+      download.destroy!
 
-      # Admin user gets full error message
-      expect(TelegramClient).to receive(:send_message).with(
-        chat_id: 456,
-        text: /❌ Download failed.*some error/m
-      )
+      expect(Downloads::Notifier).not_to receive(:new)
 
       expect {
-        DownloadJob.perform_now(download.id)
-      }.to raise_error(StandardError, 'some error')
+        described_class.perform_now(missing_id)
+      }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 end

@@ -6,7 +6,7 @@ RSpec.describe Download, type: :model do
     {
       user: user,
       chat_id: 456,
-      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      url: 'https://example.com/videos/watch?v=dQw4w',
       status: :queued,
       audio_only: false
     }

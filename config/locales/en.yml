@@ -20,3 +20,6 @@ en:
         admin_failed_notification: "❌ Download failed.\nID: %{id}\n%{error}\n\n%{username}"
         failed: "❌ Download failed.\nID: %{id}\n%{error}"
         simple_failed: "❌ Download failed.\nID: %{id}"
+        errors:
+          limit_exceeded: "User storage limit reached (used: %{used}, limit: %{limit})"
+          disk_space: "Disk free space below limit (free: %{free}, required: %{required})"

@@ -33,6 +33,7 @@ class YtdlpDownloader
 
       if result_path && File.exist?(result_path)
         final_path = File.join(@download_dir, File.basename(result_path))
+        final_path = ensure_sequential_path(final_path)
         FileUtils.mv(result_path, final_path)
         final_path
       else
@@ -105,5 +106,21 @@ class YtdlpDownloader
     end
 
     output_path
+  end
+
+  def ensure_sequential_path(path)
+    return path unless File.exist?(path)
+
+    dir = File.dirname(path)
+    ext = File.extname(path)
+    base = File.basename(path, ext)
+
+    index = 1
+    loop do
+      candidate = File.join(dir, "#{base} (#{index})#{ext}")
+      return candidate unless File.exist?(candidate)
+
+      index += 1
+    end
   end
 end

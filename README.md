@@ -37,7 +37,12 @@ TELEGRAM_WEBHOOK_HEADER_TOKEN=header_token_456
 TELEGRAM_BOT_TOKEN=telegram_bot_token
 TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 DOWNLOADS_DIR=/absolute/path/to/downloads
+DOWNLOADS_MIN_FREE_GB=50
+DOWNLOADS_HEADROOM_GB=2
+USER_STORAGE_LIMIT_GB=100
 ```
+
+`USER_STORAGE_LIMIT_GB` — default storage limit for new users (persisted in `users.storage_limit_bytes`).
 
 ## Bot Commands
 
@@ -80,6 +85,9 @@ TELEGRAM_BOT_TOKEN=telegram_bot_token
 TELEGRAM_WEBHOOK_SECRET=your_webhook_secret
 DOWNLOADS_DIR=/downloads
 DOWNLOADS_HOST_DIR=/absolute/path/to/downloads
+DOWNLOADS_MIN_FREE_GB=50
+DOWNLOADS_HEADROOM_GB=2
+USER_STORAGE_LIMIT_GB=100
 ```
 
 Start everything:
