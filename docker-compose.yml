@@ -1,0 +1,44 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: littledownloader_development
+      POSTGRES_USER: littledownloader
+      POSTGRES_PASSWORD: littledownloader
+    ports: ["5435:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U littledownloader -d littledownloader_development"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      RAILS_ENV: development
+      DATABASE_USERNAME: littledownloader
+      DATABASE_PASSWORD: littledownloader
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DOWNLOADS_DIR: /downloads
+    ports: ["3000:80"]
+    volumes:
+      - type: bind
+        source: ${DOWNLOADS_HOST_DIR}
+        target: /downloads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /rails
+
+volumes:
+  pgdata:

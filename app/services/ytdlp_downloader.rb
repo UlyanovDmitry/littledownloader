@@ -11,7 +11,7 @@ class YtdlpDownloader
   DEFAULT_MERGE_FORMAT = 'mp4'
   DEFAULT_AUDIO_FORMAT = 'mp3'
 
-  def initialize(url, download_dir: ENV.fetch('DOWNLOAD_DIR', 'tmp/downloads'), audio_only: false)
+  def initialize(url, download_dir: ENV.fetch('DOWNLOADS_DIR', 'tmp/downloads'), audio_only: false)
     @url = url
     @download_dir = download_dir
     @audio_only = audio_only

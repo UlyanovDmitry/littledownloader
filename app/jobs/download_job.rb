@@ -5,7 +5,7 @@ class DownloadJob < ApplicationJob
     download = Download.find(download_id)
     download.update!(status: :running)
 
-    base_dir = ENV.fetch('DOWNLOAD_DIR', 'tmp/downloads')
+    base_dir = ENV.fetch('DOWNLOADS_DIR', 'tmp/downloads')
     user_dir = "user_#{download.user_id}"
     download_dir = File.join(base_dir, user_dir)
 

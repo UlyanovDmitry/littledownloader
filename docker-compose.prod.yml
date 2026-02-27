@@ -1,0 +1,28 @@
+name: littledownloader_production
+
+services:
+  web:
+    build: .
+    env_file:
+      - .env.prod
+    environment:
+      RAILS_ENV: production
+      DOWNLOADS_DIR: /downloads
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    ports: ["3008:80"]
+    volumes:
+      - type: bind
+        source: ${DOWNLOADS_HOST_DIR}
+        target: /downloads
+    restart: unless-stopped
+
+  jobs:
+    build: .
+    env_file:
+      - .env.prod
+    environment:
+      RAILS_ENV: production
+      DOWNLOADS_DIR: /downloads
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    entrypoint: ['bin/jobs', 'start']
+    restart: unless-stopped

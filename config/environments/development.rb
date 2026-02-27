@@ -72,5 +72,4 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
   #
   config.hosts << ".ngrok-free.dev"
-  config.hosts << "unponderable-cretaceously-caterina.ngrok-free.dev"
 end
