@@ -61,7 +61,7 @@ class YtdlpDownloader
     cmd = %w[yt-dlp --no-color --newline]
     cmd += ['--progress'] if defined?(Rails) && !Rails.env.production?
     cmd += ['--print', 'after_move:filepath']
-    cmd += ['--extractor-args', 'youtube:player_client=web']
+    cmd += ['--extractor-args', 'youtube:player_client=web,mweb,android,ios']
     cmd += ['-o', out_template]
     cmd += ['--ignore-errors', '--no-mtime']
 

@@ -1,7 +1,7 @@
 class Download < ApplicationRecord
   acts_as_paranoid
 
-  belongs_to :user
+  belongs_to :user, inverse_of: :downloads
 
   default_scope { where(deleted_at: nil) }
 

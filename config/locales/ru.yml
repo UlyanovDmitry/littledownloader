@@ -18,3 +18,4 @@ ru:
         admin_notification: "✅ Загрузка завершена.\nID: %{id}\n%{filename}\n\n%{username}"
         admin_failed_notification: "❌ Загрузка не удалась.\nID: %{id}\n%{error}\n\n%{username}"
         failed: "❌ Загрузка не удалась.\nID: %{id}\n%{error}"
+        simple_failed: "❌ Загрузка не удалась.\nID: %{id}"
