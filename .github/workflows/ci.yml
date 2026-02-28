@@ -62,6 +62,10 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432
       TELEGRAM_WEBHOOK_HEADER_TOKEN: test_secret_token
       TELEGRAM_WEBHOOK_SECRET: telegram_webhook_secret
+      DOWNLOADS_MIN_FREE_GB: 50
+      DOWNLOADS_HEADROOM_GB: 2
+      USER_STORAGE_LIMIT_GB: 50
+      MAX_DOWNLOAD_FILE_GB: 20
     steps:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
