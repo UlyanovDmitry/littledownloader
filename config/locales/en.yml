@@ -23,3 +23,6 @@ en:
         errors:
           limit_exceeded: "User storage limit reached (used: %{used}, limit: %{limit})"
           disk_space: "Disk free space below limit (free: %{free}, required: %{required})"
+          no_url: "URL not found"
+          telegram_error: "Telegram Error %{error}"
+          file_too_big: "File too big. Allowed Size: %{limit_size} FileSize: %{file_size}"

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Telegram::User do
+RSpec.describe Telegram::Types::User do
   let(:attributes) do
     {
       id: 123,

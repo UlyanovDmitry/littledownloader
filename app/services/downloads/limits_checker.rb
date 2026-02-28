@@ -2,6 +2,9 @@ require 'open3'
 
 module Downloads
   class LimitsChecker
+    DOWNLOADS_MIN_FREE_SIZE = ENV.fetch('DOWNLOADS_MIN_FREE_GB', 50).to_i.gigabytes
+    MIN_HEADROOM_SIZE = ENV.fetch('DOWNLOADS_HEADROOM_GB', 2).to_i.gigabytes
+
     class LimitExceededError < StandardError
       attr_reader :used_human, :min_human
 
@@ -47,16 +50,15 @@ module Downloads
     attr_reader :download, :base_dir
 
     def ensure_disk_space!
-      return if DownloadJob::DOWNLOADS_MIN_FREE_GB <= 0
+      return if DOWNLOADS_MIN_FREE_SIZE <= 0
 
       free_bytes = disk_free_bytes
       return if free_bytes.nil?
 
-      min_free_bytes = DownloadJob::DOWNLOADS_MIN_FREE_GB * 1024 * 1024 * 1024
-      return if free_bytes >= min_free_bytes
+      return if free_bytes >= DOWNLOADS_MIN_FREE_SIZE
 
       free_human = ActiveSupport::NumberHelper.number_to_human_size(free_bytes)
-      min_human = ActiveSupport::NumberHelper.number_to_human_size(min_free_bytes)
+      min_human = ActiveSupport::NumberHelper.number_to_human_size(DOWNLOADS_MIN_FREE_SIZE)
       raise DiskSpaceError.new(free_human, min_human)
     end
 
@@ -79,7 +81,7 @@ module Downloads
       return if limit_bytes.nil?
 
       used_bytes = download.user.downloads.where(status: :done).sum(:file_size)
-      return if (limit_bytes - used_bytes) >= DownloadJob::HEADROOM_BYTES
+      return if (limit_bytes - used_bytes) >= MIN_HEADROOM_SIZE
 
       used_human = ActiveSupport::NumberHelper.number_to_human_size(used_bytes)
       limit_human = ActiveSupport::NumberHelper.number_to_human_size(limit_bytes)

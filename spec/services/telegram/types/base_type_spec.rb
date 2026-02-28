@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Telegram::BaseModel do
+RSpec.describe Telegram::Types::BaseType do
   let(:test_class) do
     Class.new(described_class) do
       attr_accessor :name
@@ -23,7 +23,7 @@ RSpec.describe Telegram::BaseModel do
 
   describe '.deep_objects' do
     before do
-      stub_const('Telegram::Nested', Class.new(Telegram::BaseModel) do
+      stub_const('Telegram::Types::Nested', Class.new(described_class) do
         attr_accessor :foo
       end)
     end
@@ -36,7 +36,7 @@ RSpec.describe Telegram::BaseModel do
 
     it 'creates a reader and a writer that instantiates the class' do
       instance = test_class_with_deep.new(nested: { foo: 'bar' })
-      expect(instance.nested).to be_a(Telegram::Nested)
+      expect(instance.nested).to be_a(Telegram::Types::Nested)
       expect(instance.nested.foo).to eq('bar')
     end
   end

@@ -22,3 +22,6 @@ ru:
         errors:
           limit_exceeded: "Достигнут лимит хранения (занято: %{used}, лимит: %{limit})"
           disk_space: "Недостаточно свободного места (свободно: %{free}, нужно: %{required})"
+          no_url: "URL не найден"
+          telegram_error: "Telegram Error %{error}"
+          file_too_big: "Файл слишком большой. Разрешенный размер: %{limit_size} Размер этого файла: %{file_size}"

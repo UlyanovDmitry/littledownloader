@@ -5,9 +5,11 @@ require 'rails_helper'
 RSpec.describe Telegram::Handlers::UrlHandler do
   let(:chat_id) { 123456 }
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
-  let(:msg) { instance_double(Telegram::Message) }
+  let(:text) { 'some text' }
+  let(:msg) { instance_double(Telegram::Types::Message, text: text) }
+  let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
 
-  subject { described_class.new(chat_id, msg, user) }
+  subject { described_class.new(chat_id, user, tg_update) }
 
   before do
     allow(DownloadJob).to receive(:perform_later)
@@ -16,7 +18,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
 
   describe '#call' do
     let(:url) { 'https://youtube.com/watch?v=123' }
-    let(:msg) { instance_double(Telegram::Message, text: url) }
+    let(:text) { url }
 
     it 'creates a Download record, sends message and enqueues job' do
       expect { subject.call }.to change(Download, :count).by(1)
@@ -35,12 +37,25 @@ RSpec.describe Telegram::Handlers::UrlHandler do
     end
 
     context 'when message contains audio-only' do
-      let(:msg) { instance_double(Telegram::Message, text: "#{url} audio-only") }
+      let(:text) { "#{url} audio-only" }
 
       it 'creates Download with audio_only: true' do
         subject.call
         download = Download.last
         expect(download.audio_only).to be true
+      end
+    end
+
+    context 'when message has no url' do
+      let(:text) { 'just text' }
+
+      it 'does not create download and notifies user' do
+        expect { subject.call }.not_to change(Download, :count)
+
+        expect(TelegramClient).to have_received(:send_message).with(
+          chat_id: chat_id,
+          text: I18n.t('telegram.handlers.download.errors.no_url')
+        )
       end
     end
   end

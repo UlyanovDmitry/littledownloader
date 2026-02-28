@@ -4,7 +4,7 @@ module Telegram
     def self.call(update) = new(update).call
 
     def initialize(update)
-      @tg_update = UpdateFullData.new update
+      @tg_update = Types::UpdateFullData.new update
     end
 
     def call

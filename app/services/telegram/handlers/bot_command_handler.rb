@@ -32,7 +32,7 @@ module Telegram
       end
 
       def command_name
-        msg.text.delete_prefix('/').downcase
+        message_text.delete_prefix('/').downcase
       end
     end
   end

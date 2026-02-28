@@ -2,24 +2,28 @@
 
 module Telegram
   module Handlers
-    class UrlHandler < BaseHandler
+      class UrlHandler < BaseHandler
       def call
-        url = extract_url
-        audio_only = msg.text.include?('audio-only')
+        return unless download_allowed?
+
+        audio_only = message_text.to_s.include?('audio-only')
 
         download = Download.create!(
           user: user,
           chat_id: chat_id,
-          url: url,
+          url: extract_url,
           status: :queued,
           audio_only: audio_only
         )
 
         DownloadJob.perform_later(download.id)
         TelegramClient.send_message(
-          chat_id: chat_id,
+          chat_id:,
           text: I18n.t('telegram.handlers.download.queued', id: download.id)
         )
+      rescue TelegramClient::ResponseError => e
+        TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
+        raise e
       end
 
       private
@@ -27,7 +31,19 @@ module Telegram
       def extract_url
         # We assume the URL is present because this handler was chosen
         # But just in case, find it among the entities or with a regex
-        msg.text.match(%r{https?://\S+})[0]
+        @extract_url ||= begin
+          match = message_text.match(%r{https?://\S+})
+          match ? match[0] : nil
+        end
+      end
+
+      def download_allowed?
+        if extract_url.blank?
+          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.download.errors.no_url'))
+          return false
+        end
+
+        true
       end
     end
   end

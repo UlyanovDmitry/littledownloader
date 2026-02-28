@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Telegram::Message do
+RSpec.describe Telegram::Types::Message do
   let(:attributes) do
     {
       message_id: 1,
@@ -17,7 +17,7 @@ RSpec.describe Telegram::Message do
 
   describe '#from' do
     it 'returns a Telegram::User' do
-      expect(subject.from).to be_a(Telegram::User)
+      expect(subject.from).to be_a(Telegram::Types::User)
       expect(subject.from.id).to eq(123)
       expect(subject.from.first_name).to eq('John')
     end
@@ -26,7 +26,7 @@ RSpec.describe Telegram::Message do
   describe '#entities' do
     it 'returns an array of Telegram::MessageEntity' do
       expect(subject.entities).to be_an(Array)
-      expect(subject.entities.first).to be_a(Telegram::MessageEntity)
+      expect(subject.entities.first).to be_a(Telegram::Types::MessageEntity)
       expect(subject.entities.first.type).to eq('bot_command')
     end
   end

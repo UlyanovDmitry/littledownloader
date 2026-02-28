@@ -5,10 +5,11 @@ require 'rails_helper'
 RSpec.describe Telegram::Handlers::BotCommandHandler do
   let(:chat_id) { 123456 }
   let(:user) { double('User', telegram_user_id: 789, username: 'testuser') }
-  let(:msg) { instance_double(Telegram::Message, text: text) }
+  let(:msg) { instance_double(Telegram::Types::Message, text: text) }
+  let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
   let(:text) { '/start' }
 
-  subject { described_class.new(chat_id, msg, user) }
+  subject { described_class.new(chat_id, user, tg_update) }
 
   before do
     allow(TelegramClient).to receive(:send_message)

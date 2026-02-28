@@ -1,11 +1,6 @@
 class DownloadJob < ApplicationJob
   queue_as :default
 
-  DEFAULT_DOWNLOADS_HEADROOM_GB = 2
-  HEADROOM_BYTES = ENV.fetch('DOWNLOADS_HEADROOM_GB', DEFAULT_DOWNLOADS_HEADROOM_GB).to_i * 1024 * 1024 * 1024
-  DEFAULT_DOWNLOADS_MIN_FREE_GB = 50
-  DOWNLOADS_MIN_FREE_GB = ENV.fetch('DOWNLOADS_MIN_FREE_GB', DEFAULT_DOWNLOADS_MIN_FREE_GB).to_i
-
   def perform(download_id)
     download = Download.find(download_id)
     download.update!(status: :running)
