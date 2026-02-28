@@ -39,5 +39,5 @@ module Telegram
         @extra_attributes[name.to_sym] = value
       end
     end
-end
+  end
 end

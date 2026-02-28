@@ -3,7 +3,6 @@
 module Telegram
   module Handlers
     class AudioHandler < DocumentHandler
-
       private
 
       def file_object

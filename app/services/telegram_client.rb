@@ -7,7 +7,7 @@ class TelegramClient
   API = 'https://api.telegram.org'
   class ResponseError < StandardError
     attr_reader :code
-    def initialize(msg, code=nil)
+    def initialize(msg, code = nil)
       super(msg)
       @code = code
     end

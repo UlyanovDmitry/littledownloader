@@ -3,7 +3,6 @@
 module Telegram
   module Handlers
     class VideoHandler < DocumentHandler
-
       private
       def file_object
         @file_object ||= message&.video
