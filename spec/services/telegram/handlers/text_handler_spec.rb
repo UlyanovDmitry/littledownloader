@@ -4,12 +4,13 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::TextHandler do
   let(:chat_id) { 123456 }
+  let(:chat) { double('Chat', telegram_chat_id: chat_id) }
   let(:user) { double('User') }
   let(:msg) { instance_double(Telegram::Types::Message, text: text) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
   let(:text) { 'some text' }
 
-  subject { described_class.new(chat_id, user, tg_update) }
+  subject { described_class.new(chat, user, tg_update) }
 
   before do
     allow(TelegramClient).to receive(:send_message)

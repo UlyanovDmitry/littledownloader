@@ -2,10 +2,17 @@ require 'rails_helper'
 
 RSpec.describe Downloads::Notifier do
   let(:user) { User.create!(telegram_user_id: 123, username: 'testuser') }
+  let(:chat) do
+    Chat.create!(
+      telegram_chat_id: 456,
+      username: 'test_user',
+      chat_type: 'private'
+    )
+  end
   let(:download) do
     Download.create!(
       user: user,
-      chat_id: 456,
+      chat: chat,
       url: 'https://example.com/videos/watch?v=dQw4w',
       audio_only: true
     )

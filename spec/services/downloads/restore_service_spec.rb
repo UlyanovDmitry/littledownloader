@@ -3,6 +3,13 @@ require 'tmpdir'
 
 RSpec.describe Downloads::RestoreService do
   let(:user) { User.create!(telegram_user_id: 123, username: 'testuser') }
+  let(:chat) do
+    Chat.create!(
+      telegram_chat_id: 456,
+      username: 'test_user',
+      chat_type: 'private'
+    )
+  end
 
   describe '.by_uuid!' do
     it 'restores soft-deleted record and moves file out of trash directory' do
@@ -12,7 +19,7 @@ RSpec.describe Downloads::RestoreService do
 
         download = Download.create!(
           user: user,
-          chat_id: 456,
+          chat: chat,
           url: 'https://example.com/video',
           status: :done,
           output_path: source_path,
@@ -37,8 +44,8 @@ RSpec.describe Downloads::RestoreService do
 
   describe '.all!' do
     it 'restores all soft-deleted downloads' do
-      first = Download.create!(user: user, chat_id: 1, url: 'https://example.com/1', audio_only: false)
-      second = Download.create!(user: user, chat_id: 1, url: 'https://example.com/2', audio_only: false)
+      first = Download.create!(user: user, chat: chat, url: 'https://example.com/1', audio_only: false)
+      second = Download.create!(user: user, chat: chat, url: 'https://example.com/2', audio_only: false)
 
       Downloads::SoftDeleteService.by_uuid!(first.id)
       Downloads::SoftDeleteService.by_uuid!(second.id)

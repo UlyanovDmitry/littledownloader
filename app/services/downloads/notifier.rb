@@ -5,12 +5,12 @@ module Downloads
     end
 
     def notify_success(filename)
-      notify_user(success_message(filename))
+      notify_chat(success_message(filename))
       notify_admins(admin_success_message(filename))
     end
 
     def notify_failure(error)
-      notify_user(failure_message(error))
+      notify_chat(failure_message(error))
       notify_admins(admin_failure_message(error.message))
     end
 
@@ -18,8 +18,8 @@ module Downloads
 
     attr_reader :download
 
-    def notify_user(text)
-      TelegramClient.send_message(chat_id: download.chat_id, text: text)
+    def notify_chat(text)
+      TelegramClient.send_message(chat_id: download.chat.telegram_chat_id, text: text)
     end
 
     def notify_admins(text)
@@ -42,7 +42,7 @@ module Downloads
     end
 
     def failure_message(error)
-      full_message_enabled = download.user.admin?
+      full_message_enabled = download.user.admin? || download.chat.with_admins?
         || error.is_a?(Downloads::LimitsChecker::LimitExceededError)
         || error.is_a?(Downloads::LimitsChecker::DiskSpaceError)
 

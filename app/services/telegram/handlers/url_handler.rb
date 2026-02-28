@@ -10,7 +10,7 @@ module Telegram
 
         download = Download.create!(
           user: user,
-          chat_id: chat_id,
+          chat: chat,
           url: extract_url,
           status: :queued,
           audio_only: audio_only

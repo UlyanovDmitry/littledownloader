@@ -4,6 +4,13 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::DocumentHandler do
   let(:chat_id) { 123456 }
+  let(:chat) do
+    Chat.create!(
+      telegram_chat_id: chat_id,
+      username: 'test_user',
+      chat_type: 'private'
+    )
+  end
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
   let(:file_id) { 'file_123' }
   let(:file_size) { 10.megabytes }
@@ -12,7 +19,7 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
   let(:file_url) { 'https://api.telegram.org/file/file_123' }
 
-  subject { described_class.new(chat_id, user, tg_update) }
+  subject { described_class.new(chat, user, tg_update) }
 
   before do
     allow(DownloadJob).to receive(:perform_later)
@@ -26,6 +33,7 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
 
       download = Download.last
       expect(download.url).to eq(file_url)
+      expect(download.chat).to eq(chat)
       expect(download.status).to eq('queued')
 
       expect(DownloadJob).to have_received(:perform_later).with(download.id)

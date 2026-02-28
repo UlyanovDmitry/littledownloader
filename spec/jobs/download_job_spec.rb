@@ -2,10 +2,19 @@ require 'rails_helper'
 
 RSpec.describe DownloadJob, type: :job do
   let(:user) { User.create!(telegram_user_id: 123, username: 'testuser') }
+
+  let(:chat) do
+    Chat.create!(
+      telegram_chat_id: 456,
+      username: 'test_user',
+      chat_type: chat_type
+    )
+  end
+  let(:chat_type) { 'private' }
   let(:download) do
     Download.create!(
       user: user,
-      chat_id: 456,
+      chat: chat,
       url: 'https://example.com/videos/watch?v=dQw4w',
       audio_only: true
     )
@@ -93,6 +102,20 @@ RSpec.describe DownloadJob, type: :job do
       expect {
         described_class.perform_now(missing_id)
       }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    context 'when chat is not private' do
+      let(:chat_type) { 'group' }
+
+      it 'uses chat directory for downloads' do
+        expect(YtdlpDownloader).to receive(:new).with(
+          download.url,
+          download_dir: /chat_#{chat.id}\z/,
+          audio_only: true
+        ).and_return(downloader)
+
+        described_class.perform_now(download.id)
+      end
     end
   end
 end

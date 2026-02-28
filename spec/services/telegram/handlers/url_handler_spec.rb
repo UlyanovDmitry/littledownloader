@@ -4,12 +4,19 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::UrlHandler do
   let(:chat_id) { 123456 }
+  let(:chat) do
+    Chat.create!(
+      telegram_chat_id: chat_id,
+      username: 'test_user',
+      chat_type: 'private'
+    )
+  end
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
   let(:text) { 'some text' }
   let(:msg) { instance_double(Telegram::Types::Message, text: text) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
 
-  subject { described_class.new(chat_id, user, tg_update) }
+  subject { described_class.new(chat, user, tg_update) }
 
   before do
     allow(DownloadJob).to receive(:perform_later)
@@ -25,6 +32,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
 
       download = Download.last
       expect(download.url).to eq(url)
+      expect(download.chat).to eq(chat)
       expect(download.audio_only).to be false
       expect(download.status).to eq('queued')
 

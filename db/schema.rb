@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_27_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "chats", force: :cascade do |t|
+    t.string "chat_type"
+    t.datetime "created_at", null: false
+    t.text "first_name"
+    t.text "last_name"
+    t.bigint "telegram_chat_id", null: false
+    t.text "title"
+    t.datetime "updated_at", null: false
+    t.text "username"
+    t.boolean "with_admins", default: false
+    t.index ["telegram_chat_id"], name: "index_chats_on_telegram_chat_id", unique: true
+  end
 
   create_table "downloads", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "audio_only", default: false

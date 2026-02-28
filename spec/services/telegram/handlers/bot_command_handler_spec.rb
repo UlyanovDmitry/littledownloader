@@ -4,12 +4,13 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::BotCommandHandler do
   let(:chat_id) { 123456 }
+  let(:chat) { double('Chat', telegram_chat_id: chat_id) }
   let(:user) { double('User', telegram_user_id: 789, username: 'testuser') }
   let(:msg) { instance_double(Telegram::Types::Message, text: text) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
   let(:text) { '/start' }
 
-  subject { described_class.new(chat_id, user, tg_update) }
+  subject { described_class.new(chat, user, tg_update) }
 
   before do
     allow(TelegramClient).to receive(:send_message)
@@ -31,11 +32,18 @@ RSpec.describe Telegram::Handlers::BotCommandHandler do
     context 'when command is /my_info' do
       let(:text) { '/my_info' }
       let(:user) { User.create!(telegram_user_id: 789, username: 'testuser') }
+      let(:chat) do
+        Chat.create!(
+          telegram_chat_id: chat_id,
+          username: 'test_user',
+          chat_type: 'private'
+        )
+      end
 
       before do
-        user.downloads.create!(url: 'url1', chat_id: chat_id, status: :done, file_size: 1024, audio_only: false)
-        user.downloads.create!(url: 'url2', chat_id: chat_id, status: :done, file_size: 2048, audio_only: false)
-        user.downloads.create!(url: 'url3', chat_id: chat_id, status: :failed, file_size: 5000, audio_only: false)
+        user.downloads.create!(url: 'url1', chat: chat, status: :done, file_size: 1024, audio_only: false)
+        user.downloads.create!(url: 'url2', chat: chat, status: :done, file_size: 2048, audio_only: false)
+        user.downloads.create!(url: 'url3', chat: chat, status: :failed, file_size: 5000, audio_only: false)
       end
 
       it 'sends user info with disk usage' do

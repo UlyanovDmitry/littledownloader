@@ -30,9 +30,11 @@ class DownloadJob < ApplicationJob
   end
 
   def build_downloader(download, base_dir)
+    download_last_dir = download.chat.private? ? "user_#{download.user_id}" : "chat_#{download.chat_id}"
+
     YtdlpDownloader.new(
       download.url,
-      download_dir: File.join(base_dir, "user_#{download.user_id}"),
+      download_dir: File.join(base_dir, download_last_dir),
       audio_only: download.audio_only
     )
   end

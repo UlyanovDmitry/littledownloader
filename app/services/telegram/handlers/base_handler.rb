@@ -3,13 +3,13 @@
 module Telegram
   module Handlers
     class BaseHandler
-      attr_reader :chat_id, :msg, :user, :tg_update
-      private :chat_id, :msg, :tg_update
+      attr_reader :chat, :msg, :user, :tg_update
+      private :chat, :msg, :tg_update
 
-      def self.call(chat_id, user, tg_update) = new(chat_id, user, tg_update).call
+      def self.call(chat, user, tg_update) = new(chat, user, tg_update).call
 
-      def initialize(chat_id, user, tg_update)
-        @chat_id = chat_id
+      def initialize(chat, user, tg_update)
+        @chat = chat
         @user = user
         @tg_update = tg_update
       end
@@ -19,6 +19,12 @@ module Telegram
 
       def call
         raise NotImplementedError
+      end
+
+      private
+
+      def chat_id
+        chat.telegram_chat_id
       end
     end
   end
