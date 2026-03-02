@@ -44,7 +44,7 @@ gem "image_processing", "~> 1.2"
 # gem "rack-cors"
 
 group :development, :test do
-  gem "rspec-rails", "~> 7.1.0"
+  gem "rspec-rails", "~> 8.0.3"
   gem "rspec-github"
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
