@@ -28,6 +28,7 @@ RSpec.describe Downloads::Notifier do
     it 'notifies the user and other admins, excluding the initiator' do
       User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
       user.update!(role: 'admin')
+      chat.update!(with_admins: false)
 
       expect(TelegramClient).to receive(:send_message).with(
         chat_id: 456,
@@ -40,6 +41,22 @@ RSpec.describe Downloads::Notifier do
       expect(TelegramClient).not_to receive(:send_message).with(
         chat_id: 123,
         text: /✅ Download finished.*testuser/m
+      )
+
+      notifier.notify_success('file.mp3')
+    end
+
+    it 'does not notify admins if chat is marked as with_admins' do
+      User.create!(telegram_user_id: 999, username: 'admin', role: 'admin')
+      chat.update!(with_admins: true)
+
+      expect(TelegramClient).to receive(:send_message).with(
+        chat_id: 456,
+        text: /✅ Download finished.*file.mp3/m
+      )
+      expect(TelegramClient).not_to receive(:send_message).with(
+        chat_id: 999,
+        text: /✅ Download finished/
       )
 
       notifier.notify_success('file.mp3')

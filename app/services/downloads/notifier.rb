@@ -6,7 +6,7 @@ module Downloads
 
     def notify_success(filename)
       notify_chat(success_message(filename))
-      notify_admins(admin_success_message(filename))
+      notify_admins(admin_success_message(filename)) unless download.chat.with_admins?
     end
 
     def notify_failure(error)

@@ -30,4 +30,8 @@ services:
       RAILS_ENV: production
       DOWNLOADS_DIR: /downloads
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    volumes:
+      - type: bind
+        source: ${DOWNLOADS_HOST_DIR}
+        target: /downloads
     restart: unless-stopped
