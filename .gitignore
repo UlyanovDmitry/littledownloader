@@ -5,6 +5,7 @@
 # `$XDG_CONFIG_HOME/git/ignore` or `~/.config/git/ignore`
 
 .idea/
+.vscode/
 .ai/
 # Ignore bundler config.
 /.bundle
