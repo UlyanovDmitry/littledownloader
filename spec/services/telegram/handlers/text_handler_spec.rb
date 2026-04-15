@@ -46,6 +46,15 @@ RSpec.describe Telegram::Handlers::TextHandler do
         end
       end
 
+      context 'when text contains bot name in the middle' do
+        let(:text) { 'hello @test_bot' }
+
+        it 'does not send any message' do
+          subject.call
+          expect(TelegramClient).not_to have_received(:send_message)
+        end
+      end
+
       context 'when text does not start with bot name' do
         let(:text) { 'hello bot' }
 

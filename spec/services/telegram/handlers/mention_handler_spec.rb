@@ -45,5 +45,27 @@ RSpec.describe Telegram::Handlers::MentionHandler do
         )
       end
     end
+
+    context 'in private chat' do
+      let(:chat) { double('Chat', telegram_chat_id: chat_id, private?: true) }
+
+      context 'when text starts with bot name' do
+        let(:text) { '@test_bot http://example.com' }
+
+        it 'calls UrlHandler' do
+          subject.call
+          expect(Telegram::Handlers::UrlHandler).to have_received(:call).with(chat, user, tg_update)
+        end
+      end
+
+      context 'when text does not start with bot name' do
+        let(:text) { 'http://example.com' }
+
+        it 'does not call UrlHandler' do
+          subject.call
+          expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
+        end
+      end
+    end
   end
 end
