@@ -57,9 +57,13 @@ module Downloads
     end
 
     def full_message_enabled?(error)
-      download.user.admin? || download.chat.with_admins?
-        || error.is_a?(Downloads::LimitsChecker::LimitExceededError)
-        || error.is_a?(Downloads::LimitsChecker::DiskSpaceError)
+      return true if download.user.admin?
+      return true if download.chat.with_admins?
+
+      [
+        Downloads::LimitsChecker::LimitExceededError,
+        Downloads::LimitsChecker::DiskSpaceError
+      ].any? { |klass| error.is_a?(klass) }
     end
   end
 end
