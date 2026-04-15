@@ -3,7 +3,6 @@
 module Telegram
   module Handlers
     class UrlHandler < BaseHandler
-
       def call
         perform
       rescue TelegramClient::ResponseError => e
