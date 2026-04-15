@@ -17,7 +17,6 @@ module Telegram
       end
 
       delegate :message, to: :tg_update
-      delegate :text, to: :message, prefix: :message
 
       def call
         raise NotImplementedError
@@ -27,6 +26,10 @@ module Telegram
 
       def chat_id
         chat.telegram_chat_id
+      end
+
+      def message_text
+        @message_text ||= message.text&.delete_prefix(TELEGRAM_BOT_NAME)
       end
 
       def extract_url

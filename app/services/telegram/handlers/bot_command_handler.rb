@@ -26,6 +26,10 @@ module Telegram
 
       private
 
+      def message_text
+        @message_text ||= message.text&.delete_suffix(TELEGRAM_BOT_NAME)
+      end
+
       def disk_usage_text
         total_bytes = user.downloads.where(status: :done).sum(:file_size)
         ActiveSupport::NumberHelper.number_to_human_size(total_bytes)
