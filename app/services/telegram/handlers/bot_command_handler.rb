@@ -3,7 +3,6 @@
 module Telegram
   module Handlers
     class BotCommandHandler < BaseHandler
-
       private
 
       def perform
@@ -26,7 +25,7 @@ module Telegram
           TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.errors.unknown_command'))
         end
       end
-      
+
       def message_text
         @message_text ||= message.text&.delete_suffix(TELEGRAM_BOT_NAME)
       end

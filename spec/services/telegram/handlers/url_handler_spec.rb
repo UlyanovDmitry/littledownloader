@@ -25,7 +25,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
       expect(DownloadJob).to receive(:perform_later)
 
       expect { subject.call }.to change(Download, :count).by(1)
-      
+
       download = Download.last
       expect(download.url).to eq(url)
       expect(download.chat).to eq(chat)

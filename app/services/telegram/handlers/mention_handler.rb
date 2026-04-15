@@ -1,7 +1,6 @@
 module Telegram
   module Handlers
     class MentionHandler < UrlHandler
-
       private
 
       def perform

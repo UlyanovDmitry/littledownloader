@@ -1,7 +1,6 @@
 module Telegram
   module Handlers
     class TextHandler < BaseHandler
-
       private
 
       def perform

@@ -28,9 +28,9 @@ RSpec.describe Telegram::Handlers::MentionHandler do
 
       it 'creates a Download and enqueues Job' do
         expect(DownloadJob).to receive(:perform_later)
-        
+
         expect { subject.call }.to change(Download, :count).by(1)
-        
+
         download = Download.last
         expect(download.url).to eq('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
         expect(download.chat).to eq(chat)
