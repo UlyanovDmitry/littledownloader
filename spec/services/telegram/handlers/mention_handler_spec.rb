@@ -131,5 +131,20 @@ RSpec.describe Telegram::Handlers::MentionHandler do
         expect(TelegramClient).not_to have_received(:send_message)
       end
     end
+
+    context 'with emoji in text (Unicode offset fix)' do
+      let(:text) { '🚀 @test_bot https://example.com' }
+      let(:entities) do
+        [
+          instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 3, length: 9),
+          instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 13, length: 19)
+        ]
+      end
+
+      it 'correctly identifies the bot mention and extracts the URL' do
+        expect { subject.call }.to change(Download, :count).by(1)
+        expect(Download.last.url).to eq('https://example.com')
+      end
+    end
   end
 end

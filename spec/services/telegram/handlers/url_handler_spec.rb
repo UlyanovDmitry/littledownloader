@@ -62,5 +62,19 @@ RSpec.describe Telegram::Handlers::UrlHandler do
         )
       end
     end
+
+    context 'with emoji in text (Unicode offset fix)' do
+      let(:text) { '🚀 https://example.com' }
+      let(:entities) do
+        [
+          instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 3, length: 19)
+        ]
+      end
+
+      it 'correctly extracts the URL' do
+        expect { subject.call }.to change(Download, :count).by(1)
+        expect(Download.last.url).to eq('https://example.com')
+      end
+    end
   end
 end
