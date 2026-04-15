@@ -4,8 +4,9 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::MentionHandler do
   let(:chat_id) { 123456 }
-  let(:chat) { double('Chat', telegram_chat_id: chat_id, private?: false) }
-  let(:user) { double('User') }
+  let(:chat) { Chat.create!(telegram_chat_id: chat_id, chat_type: is_private ? 'private' : 'group') }
+  let(:is_private) { false }
+  let(:user) { User.create!(telegram_user_id: 123, username: 'testuser') }
   let(:msg) { instance_double(Telegram::Types::Message, text: text, entities: entities) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
   let(:text) { '@test_bot http://example.com' }
@@ -14,8 +15,10 @@ RSpec.describe Telegram::Handlers::MentionHandler do
   subject { described_class.new(chat, user, tg_update) }
 
   before do
-    allow(Telegram::Handlers::UrlHandler).to receive(:call)
+    allow(Telegram::Handlers::UrlHandler).to receive(:call).and_call_original
+    allow(Telegram::Handlers::TextHandler).to receive(:call)
     allow(TelegramClient).to receive(:send_message)
+    allow(DownloadJob).to receive(:perform_later)
     stub_const('Telegram::Handlers::BaseHandler::TELEGRAM_BOT_NAME', '@test_bot')
   end
 
@@ -23,43 +26,43 @@ RSpec.describe Telegram::Handlers::MentionHandler do
     context 'when URL is present' do
       let(:text) { '@test_bot https://www.youtube.com/watch?v=dQw4w9WgXcQ' }
 
-      it 'calls UrlHandler' do
-        subject.call
-        expect(Telegram::Handlers::UrlHandler).to have_received(:call).with(chat, user, tg_update)
+      it 'creates a Download and enqueues Job' do
+        expect(DownloadJob).to receive(:perform_later)
+        
+        expect { subject.call }.to change(Download, :count).by(1)
+        
+        download = Download.last
+        expect(download.url).to eq('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+        expect(download.chat).to eq(chat)
+        expect(download.user).to eq(user)
       end
 
-      it 'does not send default text message' do
+      it 'sends queued message' do
         subject.call
-        expect(TelegramClient).not_to have_received(:send_message)
+        expect(TelegramClient).to have_received(:send_message).with(
+          chat_id: chat_id,
+          text: /queued/
+        )
       end
     end
 
     context 'when URL is NOT present' do
       let(:text) { '@test_bot hello' }
 
-      it 'sends no_url error and ALSO calls super (TextHandler)' do
+      it 'calls TextHandler' do
         subject.call
-        expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
-        expect(TelegramClient).to have_received(:send_message).with(
-          chat_id: chat_id,
-          text: I18n.t('telegram.handlers.download.errors.no_url')
-        )
-        expect(TelegramClient).to have_received(:send_message).with(
-          chat_id: chat_id,
-          text: I18n.t('telegram.handlers.text_handler.message')
-        )
+        expect(Telegram::Handlers::TextHandler).to have_received(:call).with(chat, user, tg_update)
       end
     end
 
     context 'in private chat' do
-      let(:chat) { double('Chat', telegram_chat_id: chat_id, private?: true) }
+      let(:is_private) { true }
 
       context 'when text starts with bot name' do
         let(:text) { '@test_bot http://example.com' }
 
-        it 'calls UrlHandler' do
-          subject.call
-          expect(Telegram::Handlers::UrlHandler).to have_received(:call).with(chat, user, tg_update)
+        it 'creates a download' do
+          expect { subject.call }.to change(Download, :count).by(1)
         end
       end
 
@@ -67,9 +70,9 @@ RSpec.describe Telegram::Handlers::MentionHandler do
         let(:text) { 'http://example.com' }
         let(:entities) { [] }
 
-        it 'does not call UrlHandler' do
+        it 'does not create a download' do
+          expect(Download).not_to receive(:create!)
           subject.call
-          expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
         end
       end
     end
@@ -78,9 +81,10 @@ RSpec.describe Telegram::Handlers::MentionHandler do
       let(:text) { '@another_bot http://example.com' }
       let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 12)] }
 
-      it 'does not call UrlHandler and does not send any message' do
+      it 'does not call any handler and does not send any message' do
+        expect(Download).not_to receive(:create!)
         subject.call
-        expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
+        expect(Telegram::Handlers::TextHandler).not_to have_received(:call)
         expect(TelegramClient).not_to have_received(:send_message)
       end
     end

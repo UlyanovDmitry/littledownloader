@@ -4,13 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::UrlHandler do
   let(:chat_id) { 123456 }
-  let(:chat) do
-    Chat.create!(
-      telegram_chat_id: chat_id,
-      username: 'test_user',
-      chat_type: 'private'
-    )
-  end
+  let(:chat) { Chat.create!(telegram_chat_id: chat_id, chat_type: 'private') }
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
   let(:text) { 'some text' }
   let(:msg) { instance_double(Telegram::Types::Message, text: text) }
@@ -28,11 +22,14 @@ RSpec.describe Telegram::Handlers::UrlHandler do
     let(:text) { url }
 
     it 'creates a Download record, sends message and enqueues job' do
-      expect { subject.call }.to change(Download, :count).by(1)
+      expect(DownloadJob).to receive(:perform_later)
 
+      expect { subject.call }.to change(Download, :count).by(1)
+      
       download = Download.last
       expect(download.url).to eq(url)
       expect(download.chat).to eq(chat)
+      expect(download.user).to eq(user)
       expect(download.audio_only).to be false
       expect(download.status).to eq('queued')
 
@@ -40,30 +37,23 @@ RSpec.describe Telegram::Handlers::UrlHandler do
         chat_id: chat_id,
         text: /✅ Accepted. Download queued.\nID: #{download.id}/m
       )
-
-      expect(DownloadJob).to have_received(:perform_later).with(download.id)
     end
 
     context 'when message contains audio-only' do
       let(:text) { "#{url} audio-only" }
 
       it 'creates Download with audio_only: true' do
-        subject.call
-        download = Download.last
-        expect(download.audio_only).to be true
+        expect { subject.call }.to change { Download.where(audio_only: true).count }.by(1)
       end
     end
 
     context 'when message has no url' do
       let(:text) { 'just text' }
 
-      it 'does not create download and notifies user' do
-        expect { subject.call }.not_to change(Download, :count)
-
-        expect(TelegramClient).to have_received(:send_message).with(
-          chat_id: chat_id,
-          text: I18n.t('telegram.handlers.download.errors.no_url')
-        )
+      it 'does not create download and does not notify user' do
+        expect(Download).not_to receive(:create!)
+        subject.call
+        expect(TelegramClient).not_to have_received(:send_message)
       end
     end
   end

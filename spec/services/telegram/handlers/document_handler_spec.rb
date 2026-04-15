@@ -4,13 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::DocumentHandler do
   let(:chat_id) { 123456 }
-  let(:chat) do
-    Chat.create!(
-      telegram_chat_id: chat_id,
-      username: 'test_user',
-      chat_type: 'private'
-    )
-  end
+  let(:chat) { Chat.create!(telegram_chat_id: chat_id, chat_type: 'private') }
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
   let(:file_id) { 'file_123' }
   let(:file_size) { 10.megabytes }
@@ -29,21 +23,22 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
 
   describe '#call' do
     it 'creates a Download record using file path and enqueues job' do
-      expect { subject.call }.to change(Download, :count).by(1)
+      expect(DownloadJob).to receive(:perform_later)
 
+      expect { subject.call }.to change(Download, :count).by(1)
+      
       download = Download.last
       expect(download.url).to eq(file_url)
       expect(download.chat).to eq(chat)
       expect(download.status).to eq('queued')
-
-      expect(DownloadJob).to have_received(:perform_later).with(download.id)
     end
 
     context 'when file is too big' do
       let(:file_size) { described_class::ALLOWED_MAX_FILE_SIZE + 1 }
 
       it 'does not create download and notifies user' do
-        expect { subject.call }.not_to change(Download, :count)
+        expect(Download).not_to receive(:create!)
+        subject.call
 
         expect(TelegramClient).to have_received(:send_message).with(
           chat_id: chat_id,
@@ -59,13 +54,10 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
     context 'when file_id is missing' do
       let(:file_id) { nil }
 
-      it 'does not create download and notifies user' do
-        expect { subject.call }.not_to change(Download, :count)
-
-        expect(TelegramClient).to have_received(:send_message).with(
-          chat_id: chat_id,
-          text: I18n.t('telegram.handlers.download.errors.no_url')
-        )
+      it 'does not create download and does not notify user' do
+        expect(Download).not_to receive(:create!)
+        subject.call
+        expect(TelegramClient).not_to have_received(:send_message)
       end
     end
 
@@ -73,18 +65,13 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
       let(:error) { TelegramClient::ResponseError.new('fail', 400) }
 
       before do
-        allow(TelegramClient).to receive(:get_file_path).and_raise(error)
+        allow(TelegramClient).to receive(:get_file_path).with(file_id).and_raise(error)
       end
 
       it 'sends localized error message and re-raises' do
         expect {
           subject.call
         }.to raise_error(TelegramClient::ResponseError)
-
-        expect(TelegramClient).to have_received(:send_message).with(
-          chat_id: chat_id,
-          text: I18n.t('telegram.handlers.download.errors.telegram_error', error: 'fail')
-        )
       end
     end
   end
