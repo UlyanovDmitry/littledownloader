@@ -50,10 +50,13 @@ RSpec.describe Telegram::Handlers::UrlHandler do
     context 'when message has no url' do
       let(:text) { 'just text' }
 
-      it 'does not create download and does not notify user' do
+      it 'does not create download and notifies user about error' do
         expect(Download).not_to receive(:create!)
         subject.call
-        expect(TelegramClient).not_to have_received(:send_message)
+        expect(TelegramClient).to have_received(:send_message).with(
+          chat_id: chat_id,
+          text: /URL not found/m
+        )
       end
     end
   end

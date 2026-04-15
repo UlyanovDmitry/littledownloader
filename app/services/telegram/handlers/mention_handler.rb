@@ -1,10 +1,10 @@
 module Telegram
   module Handlers
-    class MentionHandler < UrlHandler
+    class MentionHandler < TextHandler
       private
 
       def perform
-        return TextHandler.call(chat, user, tg_update) if extract_url.blank?
+        return UrlHandler.call(chat, user, tg_update) if extract_url.present?
 
         super
       end

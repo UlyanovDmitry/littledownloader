@@ -49,6 +49,15 @@ module Telegram
       def full_message_text
         @full_message_text ||= message.text.to_s
       end
+
+      def extract_url
+        # We assume the URL is present because this handler was chosen
+        # But just in case, find it among the entities or with a regex
+        @extract_url ||= begin
+                           match = message_text.match(%r{https?://\S+})
+                           match ? match[0] : nil
+                         end
+      end
     end
   end
 end
