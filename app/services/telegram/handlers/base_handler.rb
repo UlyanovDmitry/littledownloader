@@ -64,6 +64,7 @@ module Telegram
 
       def slice_by_telegram_offsets(text, offset, length)
         # Telegram counts offsets in UTF-16 code units.
+        # https://core.telegram.org/bots/api#messageentity
         # Ruby String#slice counts in characters.
         # We convert to UTF-16, use byteslice (each code unit is 2 bytes), then convert back.
         text.encode('UTF-16LE').byteslice(offset * 2, length * 2).force_encoding('UTF-16LE').encode('UTF-8')
