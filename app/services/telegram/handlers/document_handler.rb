@@ -17,6 +17,7 @@ module Telegram
       def file_object
         @file_object ||= message&.document
       end
+
       def download_allowed?
         if file_object.file_size > ALLOWED_MAX_FILE_SIZE
           TelegramClient.send_message(
