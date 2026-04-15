@@ -49,9 +49,12 @@ RSpec.describe Telegram::Handlers::MentionHandler do
     context 'when URL is NOT present' do
       let(:text) { '@test_bot hello' }
 
-      it 'calls TextHandler' do
+      it 'sends default text message' do
         subject.call
-        expect(Telegram::Handlers::TextHandler).to have_received(:call).with(chat, user, tg_update)
+        expect(TelegramClient).to have_received(:send_message).with(
+          chat_id: chat_id,
+          text: /Send a video link/
+        )
       end
     end
 
