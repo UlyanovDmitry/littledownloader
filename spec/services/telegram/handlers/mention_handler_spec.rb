@@ -1,0 +1,49 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe Telegram::Handlers::MentionHandler do
+  let(:chat_id) { 123456 }
+  let(:chat) { double('Chat', telegram_chat_id: chat_id, private?: false) }
+  let(:user) { double('User') }
+  let(:msg) { instance_double(Telegram::Types::Message, text: text) }
+  let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
+  let(:text) { '@test_bot http://example.com' }
+
+  subject { described_class.new(chat, user, tg_update) }
+
+  before do
+    allow(Telegram::Handlers::UrlHandler).to receive(:call)
+    allow(TelegramClient).to receive(:send_message)
+    stub_const('Telegram::Handlers::BaseHandler::TELEGRAM_BOT_NAME', '@test_bot')
+  end
+
+  describe '#call' do
+    context 'when URL is present' do
+      let(:text) { '@test_bot https://www.youtube.com/watch?v=dQw4w9WgXcQ' }
+
+      it 'calls UrlHandler' do
+        subject.call
+        expect(Telegram::Handlers::UrlHandler).to have_received(:call).with(chat, user, tg_update)
+      end
+
+      it 'does not send default text message' do
+        subject.call
+        expect(TelegramClient).not_to have_received(:send_message)
+      end
+    end
+
+    context 'when URL is NOT present' do
+      let(:text) { '@test_bot hello' }
+
+      it 'calls super (TextHandler) and sends default message' do
+        subject.call
+        expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
+        expect(TelegramClient).to have_received(:send_message).with(
+          chat_id: chat_id,
+          text: I18n.t('telegram.handlers.text_handler.message')
+        )
+      end
+    end
+  end
+end

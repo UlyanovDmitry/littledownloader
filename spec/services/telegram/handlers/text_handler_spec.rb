@@ -4,7 +4,8 @@ require 'rails_helper'
 
 RSpec.describe Telegram::Handlers::TextHandler do
   let(:chat_id) { 123456 }
-  let(:chat) { double('Chat', telegram_chat_id: chat_id) }
+  let(:is_private) { true }
+  let(:chat) { double('Chat', telegram_chat_id: chat_id, private?: is_private) }
   let(:user) { double('User') }
   let(:msg) { instance_double(Telegram::Types::Message, text: text) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
@@ -14,16 +15,44 @@ RSpec.describe Telegram::Handlers::TextHandler do
 
   before do
     allow(TelegramClient).to receive(:send_message)
+    stub_const('Telegram::Handlers::BaseHandler::TELEGRAM_BOT_NAME', '@test_bot')
   end
 
   describe '#call' do
-    context 'when text is present' do
+    context 'in private chat' do
+      let(:is_private) { true }
+
       it 'sends default text message' do
         subject.call
         expect(TelegramClient).to have_received(:send_message).with(
           chat_id: chat_id,
           text: I18n.t('telegram.handlers.text_handler.message')
         )
+      end
+    end
+
+    context 'in group chat' do
+      let(:is_private) { false }
+
+      context 'when text starts with bot name' do
+        let(:text) { '@test_bot hello' }
+
+        it 'sends default text message' do
+          subject.call
+          expect(TelegramClient).to have_received(:send_message).with(
+            chat_id: chat_id,
+            text: I18n.t('telegram.handlers.text_handler.message')
+          )
+        end
+      end
+
+      context 'when text does not start with bot name' do
+        let(:text) { 'hello bot' }
+
+        it 'does not send any message' do
+          subject.call
+          expect(TelegramClient).not_to have_received(:send_message)
+        end
       end
     end
   end
