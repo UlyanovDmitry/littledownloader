@@ -10,7 +10,11 @@ module Telegram
       private
 
       def message_for_bot?
-        chat.private? || message.text.start_with?(TELEGRAM_BOT_NAME)
+        chat.private? || mention_bot?
+      end
+
+      def mention_bot?
+        message.text.to_s.start_with?(TELEGRAM_BOT_NAME)
       end
     end
   end
