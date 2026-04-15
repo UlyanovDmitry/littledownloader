@@ -36,7 +36,17 @@ module Telegram
       end
 
       def command_name
-        message_text.delete_prefix('/').downcase
+        full_command_text.delete_prefix('/').delete_suffix(TELEGRAM_BOT_NAME)
+      end
+
+      def full_command_text
+        @full_command_text ||= message.entities.find { |entity| entity.type == 'bot_command' }&.then do |cmd_entity|
+          slice_by_telegram_offsets(full_message_text, cmd_entity.offset, cmd_entity.length)
+        end || ''
+      end
+
+      def mention_bot?
+        full_command_text.end_with?(TELEGRAM_BOT_NAME)
       end
     end
   end
