@@ -42,11 +42,7 @@ module Downloads
     end
 
     def failure_message(error)
-      full_message_enabled = download.user.admin? || download.chat.with_admins?
-        || error.is_a?(Downloads::LimitsChecker::LimitExceededError)
-        || error.is_a?(Downloads::LimitsChecker::DiskSpaceError)
-
-      key = full_message_enabled ? 'telegram.handlers.download.failed' : 'telegram.handlers.download.simple_failed'
+      key = full_message_enabled?(error) ? 'telegram.handlers.download.failed' : 'telegram.handlers.download.simple_failed'
 
       I18n.t(key, id: download.id, error: error.message)
     end
@@ -58,6 +54,12 @@ module Downloads
         error: error,
         username: download.user.username
       )
+    end
+
+    def full_message_enabled?(error)
+      download.user.admin? || download.chat.with_admins?
+        || error.is_a?(Downloads::LimitsChecker::LimitExceededError)
+        || error.is_a?(Downloads::LimitsChecker::DiskSpaceError)
     end
   end
 end
