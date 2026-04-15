@@ -35,9 +35,12 @@ RSpec.describe Telegram::Handlers::TextHandler do
         let(:text) { '@another_user hello' }
         let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 13)] }
 
-        it 'does not send any message' do
+        it 'sends default text message' do
           subject.call
-          expect(TelegramClient).not_to have_received(:send_message)
+          expect(TelegramClient).to have_received(:send_message).with(
+            chat_id: chat_id,
+            text: I18n.t('telegram.handlers.text_handler.message')
+          )
         end
       end
     end

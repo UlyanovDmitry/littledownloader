@@ -1,11 +1,11 @@
 module Telegram
   module Handlers
-    class MentionHandler < TextHandler
+    class MentionHandler < UrlHandler
       def call
         return unless message_for_bot?
-        return super unless download_allowed?
+        return TextHandler.call(chat, user, tg_update) if extract_url.blank?
 
-        UrlHandler.call(chat, user, tg_update)
+        super
       end
 
       private

@@ -37,14 +37,14 @@ RSpec.describe Telegram::Handlers::MentionHandler do
     context 'when URL is NOT present' do
       let(:text) { '@test_bot hello' }
 
-      it 'sends no_url error and does NOT call super/UrlHandler' do
+      it 'sends no_url error and ALSO calls super (TextHandler)' do
         subject.call
         expect(Telegram::Handlers::UrlHandler).not_to have_received(:call)
-        expect(TelegramClient).to have_received(:send_message).once.with(
+        expect(TelegramClient).to have_received(:send_message).with(
           chat_id: chat_id,
           text: I18n.t('telegram.handlers.download.errors.no_url')
         )
-        expect(TelegramClient).not_to have_received(:send_message).with(
+        expect(TelegramClient).to have_received(:send_message).with(
           chat_id: chat_id,
           text: I18n.t('telegram.handlers.text_handler.message')
         )

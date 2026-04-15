@@ -32,22 +32,12 @@ module Telegram
         @message_text ||= message.text&.delete_prefix(TELEGRAM_BOT_NAME)
       end
 
-      def extract_url
-        # We assume the URL is present because this handler was chosen
-        # But just in case, find it among the entities or with a regex
-        @extract_url ||= begin
-          match = message_text.match(%r{https?://\S+})
-          match ? match[0] : nil
-        end
+      def message_for_bot?
+        chat.private? || mention_bot?
       end
 
-      def download_allowed?
-        if extract_url.blank?
-          TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.no_url'))
-          return false
-        end
-
-        true
+      def mention_bot?
+        message.text.to_s.start_with?(TELEGRAM_BOT_NAME)
       end
     end
   end
