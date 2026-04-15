@@ -63,6 +63,7 @@ RSpec.describe Telegram::Handlers::TextHandler do
 
       context 'when text ends with bot name' do
         let(:text) { 'hello @test_bot' }
+        let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 6, length: 9)] }
 
         it 'sends default text message' do
           subject.call
@@ -75,10 +76,14 @@ RSpec.describe Telegram::Handlers::TextHandler do
 
       context 'when text contains bot name in the middle' do
         let(:text) { 'hello @test_bot middle' }
+        let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 6, length: 9)] }
 
-        it 'does not send any message' do
+        it 'sends default text message' do
           subject.call
-          expect(TelegramClient).not_to have_received(:send_message)
+          expect(TelegramClient).to have_received(:send_message).with(
+            chat_id: chat_id,
+            text: I18n.t('telegram.handlers.text_handler.message')
+          )
         end
       end
 

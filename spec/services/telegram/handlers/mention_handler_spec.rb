@@ -9,8 +9,13 @@ RSpec.describe Telegram::Handlers::MentionHandler do
   let(:user) { User.create!(telegram_user_id: 123, username: 'testuser') }
   let(:msg) { instance_double(Telegram::Types::Message, text: text, entities: entities) }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
-  let(:text) { '@test_bot http://example.com' }
-  let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 9)] }
+  let(:text) { '@test_bot https://www.youtube.com/watch?v=dQw4w9WgXcQ' }
+  let(:entities) do
+    [
+      instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 9),
+      instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 10, length: 43)
+    ]
+  end
 
   subject { described_class.new(chat, user, tg_update) }
 
@@ -25,6 +30,12 @@ RSpec.describe Telegram::Handlers::MentionHandler do
   describe '#call' do
     context 'when URL is present' do
       let(:text) { '@test_bot https://www.youtube.com/watch?v=dQw4w9WgXcQ' }
+      let(:entities) do
+        [
+          instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 9),
+          instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 10, length: 43)
+        ]
+      end
 
       it 'creates a Download and enqueues Job' do
         expect(DownloadJob).to receive(:perform_later)
@@ -41,13 +52,14 @@ RSpec.describe Telegram::Handlers::MentionHandler do
         subject.call
         expect(TelegramClient).to have_received(:send_message).with(
           chat_id: chat_id,
-          text: /queued/
+          text: /Accepted. Download queued./
         )
       end
     end
 
     context 'when URL is NOT present' do
       let(:text) { '@test_bot hello' }
+      let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 9)] }
 
       it 'sends default text message' do
         subject.call
@@ -63,6 +75,12 @@ RSpec.describe Telegram::Handlers::MentionHandler do
 
       context 'when text starts with bot name' do
         let(:text) { '@test_bot http://example.com' }
+        let(:entities) do
+          [
+            instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 9),
+            instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 10, length: 18)
+          ]
+        end
 
         it 'creates a download' do
           expect { subject.call }.to change(Download, :count).by(1)
@@ -88,6 +106,28 @@ RSpec.describe Telegram::Handlers::MentionHandler do
         expect(Download).not_to receive(:create!)
         subject.call
         expect(Telegram::Handlers::TextHandler).not_to have_received(:call)
+        expect(TelegramClient).not_to have_received(:send_message)
+      end
+    end
+
+    context 'when bot name is prefix of another bot name (issue reproduction)' do
+      let(:text) { '@test_botnews http://example.com' }
+      let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 13)] }
+
+      it 'does not call any handler and does not send any message' do
+        expect(Download).not_to receive(:create!)
+        subject.call
+        expect(TelegramClient).not_to have_received(:send_message)
+      end
+    end
+
+    context 'when mention is a prefix of bot name (regression test)' do
+      let(:text) { '@test http://example.com' }
+      let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'mention', offset: 0, length: 5)] }
+
+      it 'does not call any handler and does not send any message' do
+        expect(Download).not_to receive(:create!)
+        subject.call
         expect(TelegramClient).not_to have_received(:send_message)
       end
     end

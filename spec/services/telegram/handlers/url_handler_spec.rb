@@ -7,7 +7,8 @@ RSpec.describe Telegram::Handlers::UrlHandler do
   let(:chat) { Chat.create!(telegram_chat_id: chat_id, chat_type: 'private') }
   let(:user) { User.create!(telegram_user_id: 1, username: 'user') }
   let(:text) { 'some text' }
-  let(:msg) { instance_double(Telegram::Types::Message, text: text) }
+  let(:msg) { instance_double(Telegram::Types::Message, text: text, entities: entities) }
+  let(:entities) { [] }
   let(:tg_update) { instance_double(Telegram::Types::UpdateFullData, message: msg) }
 
   subject { described_class.new(chat, user, tg_update) }
@@ -20,6 +21,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
   describe '#call' do
     let(:url) { 'https://youtube.com/watch?v=123' }
     let(:text) { url }
+    let(:entities) { [instance_double(Telegram::Types::MessageEntity, type: 'url', offset: 0, length: url.length)] }
 
     it 'creates a Download record, sends message and enqueues job' do
       expect(DownloadJob).to receive(:perform_later)
@@ -49,6 +51,7 @@ RSpec.describe Telegram::Handlers::UrlHandler do
 
     context 'when message has no url' do
       let(:text) { 'just text' }
+      let(:entities) { [] }
 
       it 'does not create download and notifies user about error' do
         expect(Download).not_to receive(:create!)
