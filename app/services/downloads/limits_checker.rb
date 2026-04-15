@@ -35,7 +35,7 @@ module Downloads
       end
     end
 
-    def initialize(download:, base_dir:)
+    def initialize(download: nil, base_dir: nil)
       @download = download
       @base_dir = base_dir
     end

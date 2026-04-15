@@ -18,11 +18,11 @@ module Telegram
 
         DownloadJob.perform_later(download.id)
         TelegramClient.send_message(
-          chat_id:,
+          chat_id: chat_id,
           text: I18n.t('telegram.handlers.download.queued', id: download.id)
         )
       rescue TelegramClient::ResponseError => e
-        TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
+        TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
         raise e
       end
 
@@ -39,7 +39,7 @@ module Telegram
 
       def download_allowed?
         if extract_url.blank?
-          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.download.errors.no_url'))
+          TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.no_url'))
           return false
         end
 
