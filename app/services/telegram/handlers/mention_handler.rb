@@ -3,7 +3,7 @@ module Telegram
     class MentionHandler < TextHandler
       def call
         return unless message_for_bot?
-        return unless download_allowed?
+        return super unless download_allowed?
 
         UrlHandler.call(chat, user, tg_update)
       end

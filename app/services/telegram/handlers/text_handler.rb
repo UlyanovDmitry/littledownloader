@@ -10,21 +10,11 @@ module Telegram
       private
 
       def message_for_bot?
-        if message_starts_with_mention?
-          mention_bot?
-        else
-          chat.private?
-        end
-      end
-
-      def message_starts_with_mention?
-        message.entities.any? { |entity| entity.type == 'mention' && entity.offset == 0 }
+        chat.private? || mention_bot?
       end
 
       def mention_bot?
-        return false unless message.text.to_s.start_with?(TELEGRAM_BOT_NAME)
-
-        message.entities.any? { |entity| entity.type == 'mention' && message.text[entity.offset, entity.length] == TELEGRAM_BOT_NAME }
+        message.text.to_s.start_with?(TELEGRAM_BOT_NAME)
       end
     end
   end
