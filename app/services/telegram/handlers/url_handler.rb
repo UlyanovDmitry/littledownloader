@@ -3,7 +3,10 @@
 module Telegram
   module Handlers
     class UrlHandler < BaseHandler
-      def call
+
+      private
+
+      def perform
         return send_no_url_message if extract_url.blank?
 
         audio_only = message_text.to_s.include?('audio-only')
@@ -25,8 +28,6 @@ module Telegram
         TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
         raise e
       end
-
-      private
       def send_no_url_message
         TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.no_url'))
       end
@@ -38,6 +39,10 @@ module Telegram
           match = message_text.match(%r{https?://\S+})
           match ? match[0] : nil
         end
+      end
+
+      def message_for_bot?
+        extract_url.present?
       end
     end
   end

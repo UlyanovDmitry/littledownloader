@@ -3,7 +3,10 @@
 module Telegram
   module Handlers
     class BotCommandHandler < BaseHandler
-      def call
+
+      private
+
+      def perform
         case command_name
         when 'start'
           TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.start_command.message'))
@@ -23,9 +26,7 @@ module Telegram
           TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.errors.unknown_command'))
         end
       end
-
-      private
-
+      
       def message_text
         @message_text ||= message.text&.delete_suffix(TELEGRAM_BOT_NAME)
       end

@@ -19,10 +19,16 @@ module Telegram
       delegate :message, to: :tg_update
 
       def call
-        raise NotImplementedError
+        return unless message_for_bot?
+
+        perform
       end
 
       private
+
+      def perform
+        raise NotImplementedError
+      end
 
       def chat_id
         chat.telegram_chat_id
@@ -37,7 +43,11 @@ module Telegram
       end
 
       def mention_bot?
-        message.text.to_s.start_with?(TELEGRAM_BOT_NAME)
+        full_message_text.start_with?(TELEGRAM_BOT_NAME) || full_message_text.end_with?(TELEGRAM_BOT_NAME)
+      end
+
+      def full_message_text
+        @full_message_text ||= message.text.to_s
       end
     end
   end

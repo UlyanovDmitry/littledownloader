@@ -5,13 +5,12 @@ module Telegram
     class DocumentHandler < UrlHandler
       ALLOWED_MAX_FILE_SIZE =  ENV.fetch('MAX_DOWNLOAD_FILE_GB', 20).to_i.megabytes
 
-      def call
+      private
+      def perform
         return send_error_limit_message if file_object.file_size > ALLOWED_MAX_FILE_SIZE
 
         super
       end
-
-      private
 
       def extract_url
         file_id = file_object&.file_id
