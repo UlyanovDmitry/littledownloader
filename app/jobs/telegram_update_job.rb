@@ -22,7 +22,7 @@ class TelegramUpdateJob < ApplicationJob
           handler_klass.call(db_chat, user, tg_update)
         else
           TelegramClient.send_message(
-            chat_id:,
+            chat_id: chat_id,
             text: I18n.t('telegram.handlers.errors.not_allowed', telegram_id: user.telegram_user_id)
           )
         end

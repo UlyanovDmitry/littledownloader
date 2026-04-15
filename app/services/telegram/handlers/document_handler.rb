@@ -20,7 +20,7 @@ module Telegram
       def download_allowed?
         if file_object.file_size > ALLOWED_MAX_FILE_SIZE
           TelegramClient.send_message(
-            chat_id:,
+            chat_id: chat_id,
             text: I18n.t(
               'telegram.handlers.download.errors.file_too_big',
               limit_size: ActiveSupport::NumberHelper.number_to_human_size(ALLOWED_MAX_FILE_SIZE),

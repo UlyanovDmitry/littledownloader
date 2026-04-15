@@ -13,7 +13,7 @@ class TelegramClient
     end
   end
 
-  def self.send_message(chat_id:, text:)
+  def self.send_message(chat_id: nil, text: nil)
     token = ENV.fetch('TELEGRAM_TOKEN')
     uri = URI("#{API}/bot#{token}/sendMessage")
 

@@ -6,12 +6,12 @@ module Telegram
       def call
         case command_name
         when 'start'
-          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.start_command.message'))
+          TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.start_command.message'))
         when 'help'
-          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.help_command.message'))
+          TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.help_command.message'))
         when 'my_info'
           TelegramClient.send_message(
-            chat_id:,
+            chat_id: chat_id,
             text: I18n.t(
               'telegram.handlers.info_command.message',
               telegram_id: user.telegram_user_id,
@@ -20,7 +20,7 @@ module Telegram
             )
           )
         else
-          TelegramClient.send_message(chat_id:, text: I18n.t('telegram.handlers.errors.unknown_command'))
+          TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.errors.unknown_command'))
         end
       end
 
