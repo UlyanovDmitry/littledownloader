@@ -43,7 +43,13 @@ module Telegram
       end
 
       def mention_bot?
-        full_message_text.start_with?(TELEGRAM_BOT_NAME) || full_message_text.end_with?(TELEGRAM_BOT_NAME)
+        return false if message.entities.blank?
+
+        message.entities.any? do |entity|
+          next false unless entity.type == 'mention'
+
+          full_message_text.slice(entity.offset, entity.length) == TELEGRAM_BOT_NAME
+        end
       end
 
       def full_message_text
@@ -51,12 +57,9 @@ module Telegram
       end
 
       def extract_url
-        # We assume the URL is present because this handler was chosen
-        # But just in case, find it among the entities or with a regex
-        @extract_url ||= begin
-                           match = message_text.match(%r{https?://\S+})
-                           match ? match[0] : nil
-                         end
+        @extract_url ||= message.entities.find { |entity| entity.type == 'url' }&.then do |url_entity|
+          full_message_text.slice(url_entity.offset, url_entity.length)
+        end || ''
       end
     end
   end
