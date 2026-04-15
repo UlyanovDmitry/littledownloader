@@ -51,7 +51,9 @@ class TelegramUpdateJob < ApplicationJob
       chat.first_name = tg_chat.first_name
       chat.last_name = tg_chat.last_name
       chat.username = tg_chat.username
+      chat.chat_type = tg_chat.type
     end
+    db_chat.update!(chat_type: tg_chat.type) if db_chat.chat_type.nil?
 
     yield(db_user, db_chat) if block_given?
   end

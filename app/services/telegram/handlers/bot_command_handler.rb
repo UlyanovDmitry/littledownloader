@@ -3,7 +3,9 @@
 module Telegram
   module Handlers
     class BotCommandHandler < BaseHandler
-      def call
+      private
+
+      def perform
         case command_name
         when 'start'
           TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.start_command.message'))
@@ -24,7 +26,9 @@ module Telegram
         end
       end
 
-      private
+      def message_text
+        @message_text ||= message.text&.delete_suffix(TELEGRAM_BOT_NAME)
+      end
 
       def disk_usage_text
         total_bytes = user.downloads.where(status: :done).sum(:file_size)
@@ -32,7 +36,17 @@ module Telegram
       end
 
       def command_name
-        message_text.delete_prefix('/').downcase
+        full_command_text.delete_prefix('/').delete_suffix(TELEGRAM_BOT_NAME)
+      end
+
+      def full_command_text
+        @full_command_text ||= message.entities.find { |entity| entity.type == 'bot_command' }&.then do |cmd_entity|
+          slice_by_telegram_offsets(full_message_text, cmd_entity.offset, cmd_entity.length)
+        end || ''
+      end
+
+      def mention_bot?
+        full_command_text.end_with?(TELEGRAM_BOT_NAME)
       end
     end
   end
