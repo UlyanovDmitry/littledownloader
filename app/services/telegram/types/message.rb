@@ -21,13 +21,13 @@ module Telegram
 
       def type
         @type ||= if document.present?
-                    :document
+          :document
         elsif video.present?
-                    :video
+          :video
         elsif audio.present?
-                    :audio
+          :audio
         else
-                    main_entity&.type&.to_sym || :text
+          main_entity&.type&.to_sym || :text
         end
       end
 
