@@ -61,7 +61,7 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
       end
     end
 
-    context 'when Telegram client fails to send' do
+    context 'when Telegram client fails to get file path' do
       let(:error) { TelegramClient::ResponseError.new('fail', 400) }
 
       before do
@@ -69,6 +69,10 @@ RSpec.describe Telegram::Handlers::DocumentHandler do
       end
 
       it 'sends localized error message and re-raises' do
+        expect(TelegramClient).to receive(:send_message).with(
+          chat_id: chat_id,
+          text: I18n.t('telegram.handlers.download.errors.telegram_error', error: error.message)
+        )
         expect {
           subject.call
         }.to raise_error(TelegramClient::ResponseError)

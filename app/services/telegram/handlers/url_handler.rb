@@ -3,6 +3,14 @@
 module Telegram
   module Handlers
     class UrlHandler < BaseHandler
+
+      def call
+        perform
+      rescue TelegramClient::ResponseError => e
+        TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
+        raise e
+      end
+
       private
 
       def perform
@@ -23,10 +31,8 @@ module Telegram
           chat_id: chat_id,
           text: I18n.t('telegram.handlers.download.queued', id: download.id)
         )
-      rescue TelegramClient::ResponseError => e
-        TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.telegram_error', error: e.message))
-        raise e
       end
+
       def send_no_url_message
         TelegramClient.send_message(chat_id: chat_id, text: I18n.t('telegram.handlers.download.errors.no_url'))
       end
@@ -38,10 +44,6 @@ module Telegram
           match = message_text.match(%r{https?://\S+})
           match ? match[0] : nil
         end
-      end
-
-      def message_for_bot?
-        extract_url.present?
       end
     end
   end
