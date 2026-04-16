@@ -2,7 +2,7 @@
 
 This repository is a Rails 8.1 application for a self-hosted Telegram bot that downloads media with `yt-dlp`, stores files on local disk, and tracks metadata in PostgreSQL.
 
-Use this file as the default operating guide for Codex agents working in this repo. Prefer the focused profiles in `.codex/agents/` when a task clearly belongs to one subsystem.
+Use this file as the default operating guide for Codex agents working in this repo. Prefer the focused profiles in `.codex/agents/*.toml` when a task clearly belongs to one subsystem.
 
 ## Architecture Snapshot
 
@@ -67,9 +67,9 @@ Use this file as the default operating guide for Codex agents working in this re
 
 ## Agent Selection
 
-- Use `.codex/agents/telegram-flow.md` for webhook, parser, handler, and bot command work.
-- Use `.codex/agents/download-pipeline.md` for `DownloadJob`, `yt-dlp`, storage, quota, or notifier work.
-- Use `.codex/agents/model-layer.md` for `User`, `Chat`, `Download`, validations, scopes, enums, defaults, and model specs.
-- Use `.codex/agents/data-ops.md` for migrations, rake tasks, sync, soft-delete/restore, and operational safety changes.
-- Use `.codex/agents/test-guardian.md` for spec design, regression coverage, and CI stabilization.
-- Use `.codex/agents/reviewer.md` for code review, regression hunting, and testing-gap analysis.
+- Use `.codex/agents/telegram-flow.toml` for webhook, parser, handler, and bot command work.
+- Use `.codex/agents/download-pipeline.toml` for `DownloadJob`, `yt-dlp`, storage, quota, or notifier work.
+- Use `.codex/agents/model-layer.toml` for `User`, `Chat`, `Download`, validations, scopes, enums, defaults, and model specs.
+- Use `.codex/agents/data-ops.toml` for migrations, rake tasks, sync, soft-delete/restore, and operational safety changes.
+- Use `.codex/agents/test-guardian.toml` for spec design, regression coverage, and CI stabilization.
+- Use `.codex/agents/reviewer.toml` for code review, regression hunting, and testing-gap analysis.
