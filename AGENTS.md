@@ -49,6 +49,7 @@ Use this file as the default operating guide for Codex agents working in this re
 
 - Add or update specs for every non-trivial behavior change.
 - Keep specs close to the logic they verify:
+  `spec/models/*` for validations, associations, enums, scopes, and model defaults,
   `spec/jobs/*` for orchestration,
   `spec/services/downloads/*` for quota/notifier/service behavior,
   `spec/services/telegram/handlers/*` for message handling,
@@ -68,5 +69,7 @@ Use this file as the default operating guide for Codex agents working in this re
 
 - Use `.codex/agents/telegram-flow.md` for webhook, parser, handler, and bot command work.
 - Use `.codex/agents/download-pipeline.md` for `DownloadJob`, `yt-dlp`, storage, quota, or notifier work.
-- Use `.codex/agents/data-ops.md` for models, migrations, rake tasks, sync, and operational safety changes.
-- Use `.codex/agents/test-guardian.md` for spec design, regression coverage, CI stabilization, and review passes.
+- Use `.codex/agents/model-layer.md` for `User`, `Chat`, `Download`, validations, scopes, enums, defaults, and model specs.
+- Use `.codex/agents/data-ops.md` for migrations, rake tasks, sync, soft-delete/restore, and operational safety changes.
+- Use `.codex/agents/test-guardian.md` for spec design, regression coverage, and CI stabilization.
+- Use `.codex/agents/reviewer.md` for code review, regression hunting, and testing-gap analysis.
